@@ -1,0 +1,14 @@
+[build-system]
+requires = ["setuptools >= 69.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "event_stream_data_standard"
+version = "0.1"
+description = "A data standard for working with event stream data"
+readme = "README.md"
+license = {text = "Apache-2.0"}
+
+dependencies = [
+    "pyarrow >= 12",
+]
