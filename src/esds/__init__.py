@@ -107,10 +107,13 @@ dataset_metadata = {
 
 CodeMetadataEntry = TypedDict("CodeMetadataEntry", {"description": str, "standard_ontology_codes": List[str]})
 CodeMetadata = Mapping[str, CodeMetadataEntry]
-DatasetMetadata = TypedDict("DatasetMetadata", {
-    "dataset_name": NotRequired[str],
-    "dataset_version": NotRequired[str],
-    "etl_name": NotRequired[str],
-    "etl_version": NotRequired[str],
-    "code_metadata": NotRequired[CodeMetadata],
-})
+DatasetMetadata = TypedDict(
+    "DatasetMetadata",
+    {
+        "dataset_name": NotRequired[str],
+        "dataset_version": NotRequired[str],
+        "etl_name": NotRequired[str],
+        "etl_version": NotRequired[str],
+        "code_metadata": NotRequired[CodeMetadata],
+    },
+)

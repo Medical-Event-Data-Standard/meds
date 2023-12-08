@@ -19,10 +19,10 @@ Event = TypedDict('Event',{
 })
 
 Measurement = TypedDict('Measurement', {
-    'code': str, 
-    'text_value': NotRequired[str], 
-    'numeric_value': NotRequired[float], 
-    'datetime_value': NotRequired[datetime.datetime], 
+    'code': str,
+    'text_value': NotRequired[str],
+    'numeric_value': NotRequired[float],
+    'datetime_value': NotRequired[datetime.datetime],
     'metadata': NotRequired[Mapping[str, Any]],
 })
 ```
