@@ -1,6 +1,6 @@
-# Event Stream Data Standard
+# Medical Event Data Standard
 
-The Event Stream Data Standard is a draft data schema for storing streams of medical events, often sourced from either Electronic Health Records or claims records.
+The Medical Event Data Standard (MEDS) is a draft data schema for storing streams of medical events, often sourced from either Electronic Health Records or claims records.
 
 The core of the standard is that we define a ``patient`` data structure that contains a series of time stamped events, that in turn contain measurements of various sorts.
 
