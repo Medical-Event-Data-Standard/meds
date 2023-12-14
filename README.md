@@ -27,4 +27,4 @@ Measurement = TypedDict('Measurement', {
 })
 ```
 
-We also provide ETLs to convert common data formats to this schema: https://github.com/Event-Stream-Data-Standard/meds_etl
+We also provide ETLs to convert common data formats to this schema: https://github.com/Medical-Event-Data-Standard/meds_etl
