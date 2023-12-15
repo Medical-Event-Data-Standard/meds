@@ -17,6 +17,10 @@ from typing_extensions import NotRequired, TypedDict
 
 # The patient data schema.
 
+# We define some codes for particularly important events
+birth_code = "SNOMED/184099003"
+death_code = "SNOMED/419620001"
+
 
 def patient_schema(per_event_metadata_schema=pa.null()):
     # Return a patient schema with a particular per event metadata subschema
