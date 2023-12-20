@@ -12,6 +12,7 @@ license = {text = "Apache-2.0"}
 dependencies = [
     "pyarrow >= 12",
     "jsonschema",
+    "typing_extensions >= 4.0",
 ]
 
 [tool.isort]
