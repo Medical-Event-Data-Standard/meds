@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "meds"
-version = "0.1"
+version = "0.1.1"
 description = "A data standard for working with event stream data"
 readme = "README.md"
 license = {text = "Apache-2.0"}
