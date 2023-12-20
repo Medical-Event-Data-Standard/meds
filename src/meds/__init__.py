@@ -4,7 +4,7 @@ from typing import Any, List, Mapping
 import pyarrow as pa
 from typing_extensions import NotRequired, TypedDict
 
-# Event Stream Data Standard consists of three main components:
+# The Medical Event Data Standard consists of three main components:
 # 1. A patient data schema
 # 2. A label schema
 # 3. A dataset metadata schema.
@@ -30,6 +30,8 @@ def patient_schema(per_event_metadata_schema=pa.null()):
             ("text_value", pa.string()),
             ("numeric_value", pa.float32()),
             ("datetime_value", pa.timestamp("us")),
+            ("unit", pa.string()),
+            
             ("metadata", per_event_metadata_schema),
         ]
     )
@@ -38,7 +40,7 @@ def patient_schema(per_event_metadata_schema=pa.null()):
 
     patient = pa.schema(
         [
-            ("patient_id", pa.int64()),
+            ("person_id", pa.int64()),
             ("events", pa.list_(event)),  # Require ordered by time
         ]
     )
@@ -55,13 +57,15 @@ Measurement = TypedDict(
         "text_value": NotRequired[str],
         "numeric_value": NotRequired[float],
         "datetime_value": NotRequired[datetime.datetime],
+        "unit": NotRequired[str],
+        
         "metadata": NotRequired[Any],
     },
 )
 
 Event = TypedDict("Event", {"time": datetime.datetime, "measurements": List[Measurement]})
 
-Patient = TypedDict("Patient", {"patient_id": int, "events": List[Event]})
+Patient = TypedDict("Patient", {"person_id": int, "events": List[Event]})
 
 ############################################################
 
@@ -69,7 +73,7 @@ Patient = TypedDict("Patient", {"patient_id": int, "events": List[Event]})
 
 label = pa.schema(
     [
-        ("patient_id", pa.int64()),
+        ("person_id", pa.int64()),
         ("prediction_time", pa.timestamp("us")),
         ("boolean_value", pa.bool_()),
     ]
@@ -77,7 +81,7 @@ label = pa.schema(
 
 # Python types for the above schema
 
-Label = TypedDict("Label", {"patient_id": int, "prediction_time": datetime.datetime, "boolean_value": bool})
+Label = TypedDict("Label", {"person_id": int, "prediction_time": datetime.datetime, "boolean_value": bool})
 
 ############################################################
 
