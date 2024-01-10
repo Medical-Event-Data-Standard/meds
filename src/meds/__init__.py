@@ -82,6 +82,8 @@ Label = TypedDict("Label", {"patient_id": int, "prediction_time": datetime.datet
 ############################################################
 
 # The dataset metadata schema.
+# This is a JSON schema.
+# This data should be stored in metadata.json within the dataset folder.
 
 code_metadata_entry = {
     "type": "object",
