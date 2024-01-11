@@ -38,6 +38,12 @@ jobs:
         cd meds_etl
         python -m pip install .
 
+    # Download MIMIC-IV-Demo (v2.2)
+    - name: Download MIMIC-IV-Demo (v2.2)
+      run: |
+        cd meds_etl
+        wget -r -N -c --no-host-directories --cut-dirs=1 -np -P tests/data https://physionet.org/files/mimic-iv-demo/2.2/
+
     # Run MEDS-ETL tests
     - name: Run MEDS-ETL tests
       run: |
