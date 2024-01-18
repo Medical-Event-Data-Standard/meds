@@ -111,7 +111,7 @@ dataset_metadata = {
 
 # Python types for the above schema
 
-CodeMetadataEntry = TypedDict("CodeMetadataEntry", {"description": str, "standard_ontology_codes": List[str]})
+CodeMetadataEntry = TypedDict("CodeMetadataEntry", {"description": str, "parent_codes": List[str]})
 CodeMetadata = Mapping[str, CodeMetadataEntry]
 DatasetMetadata = TypedDict(
     "DatasetMetadata",
