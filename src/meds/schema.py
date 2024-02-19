@@ -39,6 +39,7 @@ def patient_schema(per_event_metadata_schema=pa.null()):
     patient = pa.schema(
         [
             ("patient_id", pa.int64()),
+            ("static_measurements", pa.list_(measurement)),
             ("events", pa.list_(event)),  # Require ordered by time
         ]
     )
@@ -61,7 +62,7 @@ Measurement = TypedDict(
 
 Event = TypedDict("Event", {"time": datetime.datetime, "measurements": List[Measurement]})
 
-Patient = TypedDict("Patient", {"patient_id": int, "events": List[Event]})
+Patient = TypedDict("Patient", {"patient_id": int, "static_measurements": List[Measurement], "events": List[Event]})
 
 ############################################################
 
