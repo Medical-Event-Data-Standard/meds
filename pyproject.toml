@@ -4,13 +4,13 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "meds"
-version = "0.1.2"
+version = "0.1.3"
 description = "A data standard for working with event stream data"
 readme = "README.md"
 license = {text = "Apache-2.0"}
 
 dependencies = [
-    "pyarrow >= 12",
+    "pyarrow >= 8",
     "jsonschema",
     "typing_extensions >= 4.0",
 ]
