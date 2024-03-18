@@ -4,7 +4,7 @@ from typing import Any, List, Mapping
 import pyarrow as pa
 from typing_extensions import NotRequired, TypedDict
 
-# Event Stream Data Standard consists of three main components:
+# Medical Event Data Standard consists of three main components:
 # 1. A patient data schema
 # 2. A label schema
 # 3. A dataset metadata schema.
