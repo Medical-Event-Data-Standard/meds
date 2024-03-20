@@ -1,3 +1,4 @@
+from meds._version import __version__  # noqa
 import warnings
 
 from .schema import (patient_schema, Measurement, Event, Patient, label, Label,
