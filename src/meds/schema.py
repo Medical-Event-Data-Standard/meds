@@ -73,12 +73,22 @@ label = pa.schema(
         ("patient_id", pa.int64()),
         ("prediction_time", pa.timestamp("us")),
         ("boolean_value", pa.bool_()),
+        ("integer_value", pa.int64()),
+        ("float_value", pa.float32()),
+        ("categorical_value", pa.string()),
     ]
 )
 
 # Python types for the above schema
 
-Label = TypedDict("Label", {"patient_id": int, "prediction_time": datetime.datetime, "boolean_value": bool})
+Label = TypedDict("Label", {
+    "patient_id": int, 
+    "prediction_time": datetime.datetime, 
+    "boolean_value": bool,
+    "integer_value" : int,
+    "float_value" : float,
+    "categorical_value" : str,
+})
 
 ############################################################
 
