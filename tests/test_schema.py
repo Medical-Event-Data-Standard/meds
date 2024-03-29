@@ -50,7 +50,36 @@ def test_label_schema():
             "boolean_value": True
         }
     ]
+    label_table = pa.Table.from_pylist(label_data, schema=label)
+    assert label_table.schema.equals(label), "Label schema does not match"
 
+    label_data = [
+        {
+            "patient_id": 123,
+            "prediction_time": datetime.datetime(2020, 1, 1, 12, 0, 0),
+            "integer_value": 4
+        }
+    ]
+    label_table = pa.Table.from_pylist(label_data, schema=label)
+    assert label_table.schema.equals(label), "Label schema does not match"
+    
+    label_data = [
+        {
+            "patient_id": 123,
+            "prediction_time": datetime.datetime(2020, 1, 1, 12, 0, 0),
+            "float_value": 0.4
+        }
+    ]
+    label_table = pa.Table.from_pylist(label_data, schema=label)
+    assert label_table.schema.equals(label), "Label schema does not match"
+    
+    label_data = [
+        {
+            "patient_id": 123,
+            "prediction_time": datetime.datetime(2020, 1, 1, 12, 0, 0),
+            "categorical_value": "text"
+        }
+    ]
     label_table = pa.Table.from_pylist(label_data, schema=label)
     assert label_table.schema.equals(label), "Label schema does not match"
 
