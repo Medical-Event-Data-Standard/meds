@@ -1,5 +1,5 @@
 import datetime
-from typing import Any, List, Mapping
+from typing import Any, List, Mapping, Optional
 
 import pyarrow as pa
 from typing_extensions import NotRequired, TypedDict
