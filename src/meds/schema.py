@@ -1,5 +1,5 @@
 import datetime
-from typing import Any, List, Mapping
+from typing import Any, List, Mapping, Optional
 
 import pyarrow as pa
 from typing_extensions import NotRequired, TypedDict
@@ -73,12 +73,22 @@ label = pa.schema(
         ("patient_id", pa.int64()),
         ("prediction_time", pa.timestamp("us")),
         ("boolean_value", pa.bool_()),
+        ("integer_value", pa.int64()),
+        ("float_value", pa.float64()),
+        ("categorical_value", pa.string()),
     ]
 )
 
 # Python types for the above schema
 
-Label = TypedDict("Label", {"patient_id": int, "prediction_time": datetime.datetime, "boolean_value": bool})
+Label = TypedDict("Label", {
+    "patient_id": int, 
+    "prediction_time": datetime.datetime, 
+    "boolean_value": Optional[bool],
+    "integer_value" : Optional[int],
+    "float_value" : Optional[float],
+    "categorical_value" : Optional[str],
+})
 
 ############################################################
 
