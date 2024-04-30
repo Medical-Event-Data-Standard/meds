@@ -60,7 +60,7 @@ Event = TypedDict(
     },
 )
 
-Patient = TypedDict("Patient", {"patient_id": int, "events": List[Event]})
+Patient = TypedDict("Patient", {"patient_id": int, "events": List[Event], "properties": NotRequired[Any]})
 
 ############################################################
 
