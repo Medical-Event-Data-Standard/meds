@@ -21,11 +21,9 @@ from typing_extensions import NotRequired, TypedDict
 birth_code = "SNOMED/184099003"
 death_code = "SNOMED/419620001"
 
-# We define static events as always occurring on January 1st, 1 AD
-static_event_time = datetime.datetime(1, 1, 1)
-
-def patient_schema(per_event_properties_schema=pa.null()):
-    # Return a patient schema with a particular per event metadata subschema
+def patient_schema(per_event_properties_schema=pa.null(), per_patient_properties_schema=pa.null()):
+    # Return a patient schema with a particular per event and per patient properties shcemas
+    
     event = pa.struct(
         [
             pa.field("time", pa.timestamp("us"), nullable=False),
@@ -41,6 +39,7 @@ def patient_schema(per_event_properties_schema=pa.null()):
         [
             pa.field("patient_id", pa.int64(), nullable=False),
             pa.field("events", pa.list_(event), nullable=False),  # Require ordered by time
+            pa.field("properties", per_patient_properties_schema),
         ]
     )
 
