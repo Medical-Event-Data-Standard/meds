@@ -32,6 +32,7 @@ def patient_schema(per_event_properties_schema=pa.null()):
             pa.field("code", pa.string(), nullable=False),
             pa.field("text_value", pa.string()),
             pa.field("numeric_value", pa.float32()),
+            pa.field("datetime_value", pa.timestamp("us")),
             pa.field("properties", per_event_properties_schema),
         ]
     )
@@ -55,6 +56,7 @@ Event = TypedDict(
         "code": str,
         "text_value": NotRequired[str],
         "numeric_value": NotRequired[float],
+        "datetime_value": NotRequired[datetime.datetime],
         "properties": NotRequired[Any],
     },
 )
