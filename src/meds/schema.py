@@ -49,7 +49,7 @@ def patient_schema(per_event_properties_schema=pa.null()):
 Event = TypedDict(
     "Event",
     {
-        "time": datetime.datetime,
+        "time": NotRequired[datetime.datetime],
         "code": str,
         "text_value": NotRequired[str],
         "numeric_value": NotRequired[float],
