@@ -25,19 +25,19 @@ def patient_schema(per_event_properties_schema=pa.null()):
     # Return a patient schema with a particular per event metadata subschema
     event = pa.struct(
         [
-            pa.field("time", pa.timestamp("us")), # Static events will have a null timestamp
-            pa.field("code", pa.string(), nullable=False),
-            pa.field("text_value", pa.string()),
-            pa.field("numeric_value", pa.float32()),
-            pa.field("datetime_value", pa.timestamp("us")),
-            pa.field("properties", per_event_properties_schema),
+            ("time", pa.timestamp("us")), # Static events will have a null timestamp
+            ("code", pa.string()),
+            ("text_value", pa.string()),
+            ("numeric_value", pa.float32()),
+            ("datetime_value", pa.timestamp("us")),
+            ("properties", per_event_properties_schema),
         ]
     )
 
     patient = pa.schema(
         [
-            pa.field("patient_id", pa.int64(), nullable=False),
-            pa.field("events", pa.list_(event), nullable=False),  # Require ordered by time, nulls must be first
+            ("patient_id", pa.int64()),
+            ("events", pa.list_(event)),  # Require ordered by time, nulls must be first
         ]
     )
 
