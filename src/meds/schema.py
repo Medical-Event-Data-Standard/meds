@@ -21,26 +21,23 @@ from typing_extensions import NotRequired, TypedDict
 birth_code = "SNOMED/184099003"
 death_code = "SNOMED/419620001"
 
-
-def patient_schema(per_event_metadata_schema=pa.null()):
+def patient_schema(per_event_properties_schema=pa.null()):
     # Return a patient schema with a particular per event metadata subschema
-    measurement = pa.struct(
+    event = pa.struct(
         [
+            ("time", pa.timestamp("us")), # Static events will have a null timestamp
             ("code", pa.string()),
             ("text_value", pa.string()),
             ("numeric_value", pa.float32()),
             ("datetime_value", pa.timestamp("us")),
-            ("metadata", per_event_metadata_schema),
+            ("properties", per_event_properties_schema),
         ]
     )
-
-    event = pa.struct([("time", pa.timestamp("us")), ("measurements", pa.list_(measurement))])
 
     patient = pa.schema(
         [
             ("patient_id", pa.int64()),
-            ("static_measurements", pa.list_(measurement)),
-            ("events", pa.list_(event)),  # Require ordered by time
+            ("events", pa.list_(event)),  # Require ordered by time, nulls must be first
         ]
     )
 
@@ -49,20 +46,19 @@ def patient_schema(per_event_metadata_schema=pa.null()):
 
 # Python types for the above schema
 
-Measurement = TypedDict(
-    "Measurement",
+Event = TypedDict(
+    "Event",
     {
+        "time": NotRequired[datetime.datetime],
         "code": str,
         "text_value": NotRequired[str],
         "numeric_value": NotRequired[float],
         "datetime_value": NotRequired[datetime.datetime],
-        "metadata": NotRequired[Any],
+        "properties": NotRequired[Any],
     },
 )
 
-Event = TypedDict("Event", {"time": datetime.datetime, "measurements": List[Measurement]})
-
-Patient = TypedDict("Patient", {"patient_id": int, "static_measurements": List[Measurement], "events": List[Event]})
+Patient = TypedDict("Patient", {"patient_id": int, "events": List[Event]})
 
 ############################################################
 

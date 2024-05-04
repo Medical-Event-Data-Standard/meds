@@ -10,16 +10,11 @@ The Python type signature for the schema is as follows:
 
 Patient = TypedDict('Patient', {
   'patient_id': int,
-  'static_measurements': List[Measurement],
   'events': List[Event],
 })
 
 Event = TypedDict('Event',{
-    'time': datetime.datetime,
-    'measurements': List[Measurement],
-})
-
-Measurement = TypedDict('Measurement', {
+    'time': NotRequired[datetime.datetime],
     'code': str,
     'text_value': NotRequired[str],
     'numeric_value': NotRequired[float],

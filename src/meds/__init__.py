@@ -1,6 +1,6 @@
 from meds._version import __version__  # noqa
 
-from .schema import (patient_schema, Measurement, Event, Patient, label, Label,
+from .schema import (patient_schema, Event, Patient, label, Label,
                      code_metadata_entry, code_metadata, dataset_metadata,
                      CodeMetadataEntry, CodeMetadata, DatasetMetadata, birth_code,
                      death_code)
@@ -9,7 +9,6 @@ from .schema import (patient_schema, Measurement, Event, Patient, label, Label,
 # List all objects that we want to export
 _exported_objects = {
     'patient_schema': patient_schema,
-    'Measurement': Measurement,
     'Event': Event,
     'Patient': Patient,
     'label': label,

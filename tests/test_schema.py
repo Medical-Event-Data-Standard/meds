@@ -15,22 +15,13 @@ def test_patient_schema():
     patient_data = [
         {
             "patient_id": 123,
-            "static_measurements": [{
-                "code": "some_static_code",
-                "text_value": "example",
-                "numeric_value": 1.0,
-                "datetime_value": datetime.datetime(2019, 1, 1, 0, 0, 0),
-                "metadata": None,
-            }],
             "events": [{  # Nested list for events
                 "time": datetime.datetime(2020, 1, 1, 12, 0, 0),
-                "measurements": [{  # Nested list for measurements
-                    "code": "some_code",
-                    "text_value": "Example",
-                    "numeric_value": 10.0,
-                    "datetime_value": datetime.datetime(2020, 1, 1, 12, 0, 0),
-                    "metadata": None
-                }]
+                "code": "some_code",
+                "text_value": "Example",
+                "numeric_value": 10.0,
+                "datetime_value": datetime.datetime(2020, 1, 1, 12, 0, 0),
+                "properties": None
             }]
         }
     ]
