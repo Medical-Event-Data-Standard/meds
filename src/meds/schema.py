@@ -113,6 +113,7 @@ dataset_metadata = {
         "etl_name": {"type": "string"},
         "etl_version": {"type": "string"},
         "code_metadata": code_metadata,
+        "meds_version": {"type": "string"},
     },
 }
 
