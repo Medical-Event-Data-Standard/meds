@@ -129,5 +129,6 @@ DatasetMetadata = TypedDict(
         "etl_name": NotRequired[str],
         "etl_version": NotRequired[str],
         "code_metadata": NotRequired[CodeMetadata],
+        "meds_version": NotRequired[str],
     },
 )
