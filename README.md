@@ -23,7 +23,9 @@ Event = TypedDict('Event',{
 })
 ```
 
-Example patient following this schema
+We also provide ETLs to convert common data formats to this schema: https://github.com/Medical-Event-Data-Standard/meds_etl
+
+An example patient following this schema
 
 ```python
 
@@ -55,5 +57,3 @@ patient_data = {
 }
 
 ```
-
-We also provide ETLs to convert common data formats to this schema: https://github.com/Medical-Event-Data-Standard/meds_etl
