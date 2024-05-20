@@ -14,7 +14,7 @@ Patient = TypedDict('Patient', {
 })
 
 Event = TypedDict('Event',{
-    'time': NotRequired[datetime.datetime],
+    'time': NotRequired[datetime.datetime], # Static events will have a null timestamp here
     'code': str,
     'text_value': NotRequired[str],
     'numeric_value': NotRequired[float],
