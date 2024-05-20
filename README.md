@@ -23,4 +23,37 @@ Event = TypedDict('Event',{
 })
 ```
 
+Example patient following this schema
+
+```python
+
+patient_data = {
+  "patient_id": 123,
+  "events": [
+    # Store static events like gender with a null timestamp
+    {
+        "time": None,
+        "code": "Gender/F",
+    },
+
+    # It's recommended to record birth using the birth_code
+    {
+      "time": datetime.datetime(1995, 8, 20),
+      "code": meds.birth_code,
+    },
+
+    # Arbitrary events with sophisticated data can also be added
+    {
+        "time": datetime.datetime(2020, 1, 1, 12, 0, 0),
+        "code": "some_code",
+        "text_value": "Example",
+        "numeric_value": 10.0,
+        "datetime_value": datetime.datetime(2020, 1, 1, 12, 0, 0),
+        "properties": None
+    },
+  ]
+}
+
+```
+
 We also provide ETLs to convert common data formats to this schema: https://github.com/Medical-Event-Data-Standard/meds_etl
