@@ -21,44 +21,17 @@ from typing_extensions import NotRequired, TypedDict
 birth_code = "SNOMED/184099003"
 death_code = "SNOMED/419620001"
 
-def patient_schema(per_event_properties_schema=pa.null()):
-    # Return a patient schema with a particular per event metadata subschema
-    event = pa.struct(
+def events_schema(patient_id_type, custom_per_event_properties=pa.null()):
+    assert patient_id_type == pa.int64() or patient_id_type == pa.string()
+    
+    return pa.schema(
         [
+            ("patient_id", patient_id_type),   
             ("time", pa.timestamp("us")), # Static events will have a null timestamp
             ("code", pa.string()),
-            ("text_value", pa.string()),
             ("numeric_value", pa.float32()),
-            ("datetime_value", pa.timestamp("us")),
-            ("properties", per_event_properties_schema),
-        ]
+        ] + custom_per_event_properties
     )
-
-    patient = pa.schema(
-        [
-            ("patient_id", pa.int64()),
-            ("events", pa.list_(event)),  # Require ordered by time, nulls must be first
-        ]
-    )
-
-    return patient
-
-
-# Python types for the above schema
-
-Event = TypedDict(
-    "Event",
-    {
-        "time": NotRequired[datetime.datetime],
-        "code": str,
-        "text_value": NotRequired[str],
-        "numeric_value": NotRequired[float],
-        "datetime_value": NotRequired[datetime.datetime],
-        "properties": NotRequired[Any],
-    },
-)
-
-Patient = TypedDict("Patient", {"patient_id": int, "events": List[Event]})
 
 ############################################################
 
