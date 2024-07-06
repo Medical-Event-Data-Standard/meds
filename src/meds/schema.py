@@ -21,7 +21,7 @@ from typing_extensions import NotRequired, TypedDict
 birth_code = "SNOMED/184099003"
 death_code = "SNOMED/419620001"
 
-def patient_schema(per_event_properties_schema=pa.null()):
+def patient_schema(custom_per_event_properties=[]):
     # Return a patient schema with a particular per event metadata subschema
     event = pa.struct(
         [
@@ -30,8 +30,7 @@ def patient_schema(per_event_properties_schema=pa.null()):
             ("text_value", pa.string()),
             ("numeric_value", pa.float32()),
             ("datetime_value", pa.timestamp("us")),
-            ("properties", per_event_properties_schema),
-        ]
+        ] + custom_per_event_properties
     )
 
     patient = pa.schema(
