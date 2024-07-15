@@ -16,7 +16,7 @@ from typing_extensions import NotRequired, TypedDict
 
 # Every MEDS extract consists of a folder that contains both metadata and patient data with the following structure:
 # - data/
-#    A (possibly) nested folder containing multiple parquet files containing patient event data following the events_schema folder.
+#    A (possibly nested) folder containing multiple parquet files containing patient event data following the events_schema folder.
 #    glob("data/**/*.parquet") is the recommended way for obtaining all patient event files.
 # - dataset_metadata.json
 #    Dataset level metadata containing information about the ETL used, data version, etc
