@@ -22,11 +22,9 @@ birth_code = "SNOMED/184099003"
 death_code = "SNOMED/419620001"
 
 def events_schema(patient_id_type, custom_per_event_properties=[]):
-    assert patient_id_type == pa.int64() or patient_id_type == pa.string()
-    
     return pa.schema(
         [
-            ("patient_id", patient_id_type),   
+            ("patient_id", pa.int64()),   
             ("time", pa.timestamp("us")), # Static events will have a null timestamp
             ("code", pa.string()),
             ("numeric_value", pa.float32()),
