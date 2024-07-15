@@ -116,13 +116,13 @@ DatasetMetadata = TypedDict(
 # This is a parquet schema.
 # This data should be stored in code_metadata.parquet within the dataset folder.
 
-def code_metadata_schema(custom_per_event_properties=[]): 
+def code_metadata_schema(custom_per_code_properties=[]): 
     code_metadata = pa.schema(
         [
             ("code", pa.string()),
             ("description", pa.string()),
             ("parent_codes", pa.list(pa.string()),
-        ] + custom_per_event_properties
+        ] + custom_per_code_properties
     )
 
     return code_metadata
