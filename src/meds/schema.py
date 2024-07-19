@@ -38,8 +38,8 @@ from typing_extensions import NotRequired, TypedDict
 # which vastly simplifies many data analysis pipelines.
 
 # We define some codes for particularly important events
-birth_code = "SNOMED/184099003"
-death_code = "SNOMED/419620001"
+birth_code = "MEDS_BIRTH"
+death_code = "MEDS_DEATH"
 
 def patient_events_schema(custom_per_event_properties=[]):
     return pa.schema(
