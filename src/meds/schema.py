@@ -20,8 +20,10 @@ from typing_extensions import NotRequired, TypedDict
 #    glob("data/**/*.parquet") is the recommended way for obtaining all patient event files.
 # - dataset_metadata.json
 #    Dataset level metadata containing information about the ETL used, data version, etc
-# - code_metadata.parquet
+# - (Optional) code_metadata.parquet
 #    Code level metadata containing information about the code descriptions, standard mappings, etc
+# - (Optional) patient_split.csv
+#    A specification of patient splits that should be used.
 
 ############################################################
 
@@ -77,6 +79,22 @@ Label = TypedDict("Label", {
     "float_value" : Optional[float],
     "categorical_value" : Optional[str],
 }, total=False)
+
+
+############################################################
+
+# The patient split schema.
+
+train_split = "train"
+tuning_split = "tuning"
+test_split = "test"
+
+patient_split = pa.schema(
+    [
+        ("patient_id", pa.int64()),
+        ("split", pa.string()),
+    ]
+)
 
 ############################################################
 
