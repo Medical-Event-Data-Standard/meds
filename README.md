@@ -14,34 +14,19 @@ up MEDS, we will define some key terminology that we use in this standard.
      hospital admission, regardless of how many admissions that individual has in the dataset (such as the
      [eICU](https://eicu-crd.mit.edu/) dataset). In these cases, a _patient_ in the MEDS dataset may refer to
      a hospital admission rather than an individual.
-  2. A _measurement_ or _patient measurement_ or _observation_ in a MEDS dataset refers to a single measurable
-     quantity observed about the patient during their care. These observations can take on many forms, such as
-     observing a diagnostic code being applied to the patient, observing a patient's admission or transfer
-     from one unit to another, observing a laboratory test result, but always correspond to a single
-     measureable unit about a single patient.
-  3. A _code_ is the categorical descriptor of what happened in a patient measurement. In particular, in
-     almost all structured, longitudinal datasets, a measurement can be described as consisting of a tuple
-     containing a `patient_id` (who this measurement is about); a `timestamp` (when this measurement
-     happened); some categorical qualifier describing what was measured, which we will call a `code`; a value
-     of a given type, such as a `numerical_value`, a `text_value`, or a `categorical_value`; and possibly one
-     or more additional measurement properties that describe the measurement in a non-standardized manner.
-  4. An _event_ or _patient event_ in a MEDS dataset corresponds to all observations about a patient that
-     occur at a unique timestamp (within the level of temporal granularity in the MEDS dataset).
-  5. A _static_ measurement is one that occurs without a source timestamp being recorded in the raw dataset
-     **and** that can be interpreted as being applicable to the patient at any point in time during their
-     care. All other measurements observed in the raw dataset will be considered to be _dynamic_ measurements
-     that can vary in time in an unknown manner. Note that there are a third class of measurements that may,
-     at times, be induced in the dataset known as _time-derived_ measurements which correspond to measurements
-     that occur in time like _dynamic_ measurements but can be computed deterministically in advance using
-     only the timestamp at which a measurement occurs and the patient's static (or, rarely, historical) data,
-     such as the patient's age or the season of the year in which a measurement occurs. These are rarely
-     recorded in the raw data but may be used during modeling.
+  2. A _code_ is the categorical descriptor of what is being observed in any given observation of a patient.
+     In particular, in almost all structured, longitudinal datasets, a measurement can be described as
+     consisting of a tuple containing a `patient_id` (who this measurement is about); a `timestamp` (when this
+     measurement happened); some categorical qualifier describing what was measured, which we will call a
+     `code`; a value of a given type, such as a `numerical_value`, a `text_value`, or a `categorical_value`;
+     and possibly one or more additional measurement properties that describe the measurement in a
+     non-standardized manner.
 
 ## Core MEDS Data Organization
 
 MEDS consists of four main data components/schemas:
-  1. A _patient measurement schema_. This schema describes the underlying medical data, organized as sequences
-     of patient measurements, in the dataset.
+  1. A _data schema_. This schema describes the underlying medical data, organized as sequences of patient
+     observations, in the dataset.
   2. A _patient subsequence label schema_. This schema describes labels that may be predicted about a patient
      at a given timestamp in the patient record.
   3. A _code metadata schema_. This schema contains metadata describing the codes used to categorize the
@@ -54,10 +39,10 @@ MEDS consists of four main data components/schemas:
 ### Organization on Disk
 Given a MEDS dataset stored in the `$MEDS_ROOT` directory data of the various schemas outlined above can be
 found in the following subfolders:
-  - `$MEDS_ROOT/data/`: This directory will contain data in the _patient measurement schema_, organized as a
+  - `$MEDS_ROOT/data/`: This directory will contain data in the _data schema_, organized as a
     series of possibly nested sharded dataframes stored in `parquet` files. In particular, the file glob
     `glob("$MEDS_ROOT/data/**/*.parquet)` will capture all sharded data files of the raw MEDS data, all
-    organized into _patient measurement schema_ files, sharded by patient and sorted, for each patient, by
+    organized into _data schema_ files, sharded by patient and sorted, for each patient, by
     timestamp.
   - `$MEDS_ROOT/metadata/codes.parquet`: This file contains per-code metadata in the _code metadata schema_
     about the MEDS dataset. As this dataset describes all codes observed in the full MEDS dataset, it is _not_
