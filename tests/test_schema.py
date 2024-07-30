@@ -13,7 +13,7 @@ def test_data_schema():
     Test that mock data follows the data schema.
     """
     # Each element in the list is a row in the table
-    data = [
+    raw_data = [
         {
             "patient_id": 123,
             "time": datetime.datetime(2020, 1, 1, 12, 0, 0),
@@ -25,7 +25,7 @@ def test_data_schema():
 
     schema = data([("text_value", pa.string())])
 
-    table = pa.Table.from_pylist(data, schema=schema)
+    table = pa.Table.from_pylist(raw_data, schema=schema)
     assert table.schema.equals(schema), "Patient schema does not match"
 
 def test_code_metadata_schema():
@@ -33,7 +33,7 @@ def test_code_metadata_schema():
     Test that mock code metadata follows the schema.
     """
     # Each element in the list is a row in the table
-    data = [
+    code_metadata = [
         {
             "code": "some_code",
             "description": "foo",
@@ -43,7 +43,7 @@ def test_code_metadata_schema():
 
     schema = code_metadata()
 
-    table = pa.Table.from_pylist(data, schema=schema)
+    table = pa.Table.from_pylist(code_metadata, schema=schema)
     assert table.schema.equals(schema), "Code metadata schema does not match"
 
 def test_patient_split_schema():
@@ -51,14 +51,14 @@ def test_patient_split_schema():
     Test that mock data follows the data schema.
     """
     # Each element in the list is a row in the table
-    data = [
+    patient_split_data = [
         {"patient_id": 123, "split": train_split},
         {"patient_id": 123, "split": tuning_split},
         {"patient_id": 123, "split": held_out_split},
         {"patient_id": 123, "split": "special"},
     ]
 
-    table = pa.Table.from_pylist(data, schema=patient_split)
+    table = pa.Table.from_pylist(patient_split_data, schema=patient_split)
     assert table.schema.equals(patient_split), "Patient split schema does not match"
 
 def test_label_schema():

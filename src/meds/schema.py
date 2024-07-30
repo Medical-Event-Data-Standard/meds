@@ -131,7 +131,7 @@ def code_metadata(custom_per_code_properties=[]):
         [
             ("code", pa.string()),
             ("description", pa.string()),
-            ("parent_codes", pa.list(pa.string())),
+            ("parent_codes", pa.list_(pa.string())),
         ] + custom_per_code_properties
     )
 
