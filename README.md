@@ -16,7 +16,7 @@ up MEDS, we will define some key terminology that we use in this standard.
      a hospital admission rather than an individual.
   2. A _code_ is the categorical descriptor of what is being observed in any given observation of a patient.
      In particular, in almost all structured, longitudinal datasets, a measurement can be described as
-     consisting of a tuple containing a `patient_id` (who this measurement is about); a `timestamp` (when this
+     consisting of a tuple containing a `patient_id` (who this measurement is about); a `time` (when this
      measurement happened); some categorical qualifier describing what was measured, which we will call a
      `code`; a value of a given type, such as a `numerical_value`, a `text_value`, or a `categorical_value`;
      and possibly one or more additional measurement properties that describe the measurement in a
@@ -28,7 +28,7 @@ MEDS consists of four main data components/schemas:
   1. A _data schema_. This schema describes the underlying medical data, organized as sequences of patient
      observations, in the dataset.
   2. A _patient subsequence label schema_. This schema describes labels that may be predicted about a patient
-     at a given timestamp in the patient record.
+     at a given time in the patient record.
   3. A _code metadata schema_. This schema contains metadata describing the codes used to categorize the
      observed measurements in the dataset.
   4. A _dataset metadata schema_. This schema contains metadata about the MEDS dataset itself, such as when it
@@ -43,7 +43,7 @@ found in the following subfolders:
     series of possibly nested sharded dataframes stored in `parquet` files. In particular, the file glob
     `glob("$MEDS_ROOT/data/**/*.parquet)` will capture all sharded data files of the raw MEDS data, all
     organized into _data schema_ files, sharded by patient and sorted, for each patient, by
-    timestamp.
+    time.
   - `$MEDS_ROOT/metadata/codes.parquet`: This file contains per-code metadata in the _code metadata schema_
     about the MEDS dataset. As this dataset describes all codes observed in the full MEDS dataset, it is _not_
     sharded. Note that some pre-processing operations may, at times, produce sharded code metadata files, but
@@ -69,67 +69,135 @@ does not exist.
 
 ### Schemas
 
-**TODO**: copy here from the schema file and describe.
+#### The Data Schema
+MEDS data also must satisfy two important properties:
+  1. Data about a single patient cannot be split across parquet files. If a patient is in a dataset it must be
+     in one and only one parquet file.
+  2. Data about a single patient must be contiguous within a particular parquet file and sorted by time. 
 
+The data schema has four mandatory fields:
+  1. `patient_id`: The ID of the patient this event is about.
+  2. `time`: The time of the event. This field is nullable for static events.
+  3. `code`: The code of the event.
+  4. `numeric_value`: The numeric value of the event. This field is nullable for non-numeric events.
 
-
-
-
-
-## Old -- to be deleted.
-
-The core of the standard is that we define a ``patient`` data structure that contains a series of time stamped events, that in turn contain measurements of various sorts.
-
-The Python type signature for the schema is as follows:
+In addition, it can contain any number of custom properties to further enrich observations. The python
+function below generates a pyarrow schema for a given set of custom properties.
 
 ```python
-
-Patient = TypedDict('Patient', {
-  'patient_id': int,
-  'events': List[Event],
-})
-
-Event = TypedDict('Event',{
-    'time': NotRequired[datetime.datetime], # Static events will have a null timestamp here
-    'code': str,
-    'text_value': NotRequired[str],
-    'numeric_value': NotRequired[float],
-    'datetime_value': NotRequired[datetime.datetime],
-    'metadata': NotRequired[Mapping[str, Any]],
-})
+def data_schema(custom_properties=[]):
+    return pa.schema(
+        [
+            ("patient_id", pa.int64()),
+            ("time", pa.timestamp("us")), # Static events will have a null timestamp
+            ("code", pa.string()),
+            ("numeric_value", pa.float32()),
+        ] + custom_properties
+    )
 ```
 
-We also provide ETLs to convert common data formats to this schema: https://github.com/Medical-Event-Data-Standard/meds_etl
-
-An example patient following this schema
+#### The label schema.
+Models, when predicting this label, are allowed to use all data about a patient up to and including the
+prediction time. Exclusive prediction times are not currently supported, but if you have a use case for them
+please add a GitHub issue.
 
 ```python
+label = pa.schema(
+    [
+        ("patient_id", pa.int64()),
+        ("prediction_time", pa.timestamp("us")),
+        ("boolean_value", pa.bool_()),
+        ("integer_value", pa.int64()),
+        ("float_value", pa.float64()),
+        ("categorical_value", pa.string()),
+    ]
+)
 
-patient_data = {
-  "patient_id": 123,
-  "events": [
-    # Store static events like gender with a null timestamp
-    {
-        "time": None,
-        "code": "Gender/F",
-    },
+Label = TypedDict("Label", {
+    "patient_id": int, 
+    "prediction_time": datetime.datetime, 
+    "boolean_value": Optional[bool],
+    "integer_value" : Optional[int],
+    "float_value" : Optional[float],
+    "categorical_value" : Optional[str],
+}, total=False)
+```
 
-    # It's recommended to record birth using the birth_code
-    {
-      "time": datetime.datetime(1995, 8, 20),
-      "code": meds.birth_code,
-    },
+#### The patient split schema.
 
-    # Arbitrary events with sophisticated data can also be added
-    {
-        "time": datetime.datetime(2020, 1, 1, 12, 0, 0),
-        "code": "some_code",
-        "text_value": "Example",
-        "numeric_value": 10.0,
-        "datetime_value": datetime.datetime(2020, 1, 1, 12, 0, 0),
-        "properties": None
+Three sentinel split names are defined for convenience and shared processing:
+  1. A training split, named `train`, used for ML model training.
+  2. A tuning split, named `tuning`, used for hyperparameter tuning. This is sometimes also called a
+     "validation" split or a "dev" split. In many cases, standardizing on a tuning split is not necessary and
+     models should feel free to merge this split with the training split if desired.
+  3. A held-out split, named `held_out`, used for final model evaluation. In many cases, this is also called a
+     "test" split. When performing benchmarking, this split should not be used at all for model selection,
+     training, or for any purposes up to final validation.
+
+Additional split names can be used by the user as desired.
+
+```
+train_split = "train"
+tuning_split = "tuning"
+held_out_split = "held_out"
+
+patient_split = pa.schema(
+    [
+        ("patient_id", pa.int64()),
+        ("split", pa.string()),
+    ]
+)
+
+PatientSplit = TypedDict("PatientSplit", {
+    "patient_id": int,
+    "split": str,
+}, total=True)
+```
+
+#### The dataset metadata schema.
+
+```python
+dataset_metadata = {
+    "type": "object",
+    "properties": {
+        "dataset_name": {"type": "string"},
+        "dataset_version": {"type": "string"},
+        "etl_name": {"type": "string"},
+        "etl_version": {"type": "string"},
+        "meds_version": {"type": "string"},
     },
-  ]
 }
 
+# Python type for the above schema
+
+DatasetMetadata = TypedDict(
+    "DatasetMetadata",
+    {
+        "dataset_name": NotRequired[str],
+        "dataset_version": NotRequired[str],
+        "etl_name": NotRequired[str],
+        "etl_version": NotRequired[str],
+        "meds_version": NotRequired[str],
+    },
+    total=False,
+)
+```
+
+#### The code metadata schema.
+
+```python
+def code_metadata_schema(custom_per_code_properties=[]): 
+    code_metadata = pa.schema(
+        [
+            ("code", pa.string()),
+            ("description", pa.string()),
+            ("parent_codes", pa.list(pa.string()),
+        ] + custom_per_code_properties
+    )
+
+    return code_metadata
+
+# Python type for the above schema
+
+CodeMetadata = TypedDict("CodeMetadata", {"code": str, "description": str, "parent_codes": List[str]}, total=False)
 ```
