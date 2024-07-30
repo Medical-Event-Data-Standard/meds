@@ -26,7 +26,7 @@ from typing_extensions import NotRequired, TypedDict
 birth_code = "MEDS_BIRTH"
 death_code = "MEDS_DEATH"
 
-def data(custom_properties=[]):
+def data_schema(custom_properties=[]):
     return pa.schema(
         [
             ("patient_id", pa.int64()),
@@ -45,7 +45,7 @@ def data(custom_properties=[]):
 # including the prediction time. Exclusive prediction times are not currently supported, but if you have a use
 # case for them please add a GitHub issue.
 
-label = pa.schema(
+label_schema = pa.schema(
     [
         ("patient_id", pa.int64()),
          # The patient who is being labeled.
@@ -83,7 +83,7 @@ train_split = "train" # For ML training.
 tuning_split = "tuning" # For ML hyperparameter tuning. Also often called "validation" or "dev".
 held_out_split = "held_out" # For final ML evaluation. Also often called "test".
 
-patient_split = pa.schema(
+patient_split_schema = pa.schema(
     [
         ("patient_id", pa.int64()),
         ("split", pa.string()),
@@ -96,7 +96,7 @@ patient_split = pa.schema(
 # This is a JSON schema.
 
 
-dataset_metadata = {
+dataset_metadata_schema = {
     "type": "object",
     "properties": {
         "dataset_name": {"type": "string"},
@@ -126,7 +126,7 @@ DatasetMetadata = TypedDict(
 # The code metadata schema.
 # This is a parquet schema.
 
-def code_metadata(custom_per_code_properties=[]): 
+def code_metadata_schema(custom_per_code_properties=[]): 
     return pa.schema(
         [
             ("code", pa.string()),
