@@ -147,11 +147,6 @@ patient_split = pa.schema(
         ("split", pa.string()),
     ]
 )
-
-PatientSplit = TypedDict("PatientSplit", {
-    "patient_id": int,
-    "split": str,
-}, total=True)
 ```
 
 #### The dataset metadata schema.
