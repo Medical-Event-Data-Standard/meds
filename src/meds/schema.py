@@ -1,38 +1,23 @@
+"""The core schemas for the MEDS format.
+
+Please see the README for more information, including expected file organization on disk, more details on what
+each schema should capture, etc.
+"""
 import datetime
 from typing import Any, List, Mapping, Optional
 
 import pyarrow as pa
 from typing_extensions import NotRequired, TypedDict
 
-# Medical Event Data Standard consists of four main components:
-# 1. A patient event schema
-# 2. A label schema
-# 3. A dataset metadata schema.
-# 4. A code metadata schema.
-#
-# Event data, labels, and code metadata is specified using pyarrow. Dataset metadata is specified using JSON.
-
-# We also specify a directory structure for how these should be laid out on disk.
-
-# Every MEDS extract consists of a folder that contains both metadata and patient data with the following structure:
-# - data/
-#    A (possibly nested) folder containing multiple parquet files containing patient event data following the events_schema folder.
-#    glob("data/**/*.parquet") is the recommended way for obtaining all patient event files.
-# - dataset_metadata.json
-#    Dataset level metadata containing information about the ETL used, data version, etc
-# - (Optional) code_metadata.parquet
-#    Code level metadata containing information about the code descriptions, standard mappings, etc
-# - (Optional) patient_split.csv
-#    A specification of patient splits that should be used.
 
 ############################################################
 
-# The patient event data schema.
+# The data schema.
 #
-# Patient event data also must satisfy two important properties:
+# MEDS data also must satisfy two important properties:
 #
-# 1. Patient event data cannot be split across parquet files. If a patient is in a dataset it must be in one and only one parquet file.
-# 2. Patient event data must be contiguous within a particular parquet file and sorted by event time. 
+# 1. Data about a single patient cannot be split across parquet files. If a patient is in a dataset it must be in one and only one parquet file.
+# 2. Data about a single patient must be contiguous within a particular parquet file and sorted by time. 
 
 # Both of these restrictions allow the stream rolling processing (see https://docs.pola.rs/api/python/stable/reference/dataframe/api/polars.DataFrame.rolling.html),
 # which vastly simplifies many data analysis pipelines.
@@ -41,14 +26,14 @@ from typing_extensions import NotRequired, TypedDict
 birth_code = "MEDS_BIRTH"
 death_code = "MEDS_DEATH"
 
-def patient_events_schema(custom_per_event_properties=[]):
+def data_schema(custom_properties=[]):
     return pa.schema(
         [
-            ("patient_id", pa.int64()),   
+            ("patient_id", pa.int64()),
             ("time", pa.timestamp("us")), # Static events will have a null timestamp
             ("code", pa.string()),
             ("numeric_value", pa.float32()),
-        ] + custom_per_event_properties
+        ] + custom_properties
     )
 
 # No python type is provided because Python tools for processing MEDS data will often provide their own types.
@@ -56,7 +41,9 @@ def patient_events_schema(custom_per_event_properties=[]):
 
 ############################################################
 
-# The label schema.
+# The label schema. Models, when predicting this label, are allowed to use all data about a patient up to and
+# including the prediction time. Exclusive prediction times are not currently supported, but if you have a use
+# case for them please add a GitHub issue.
 
 label = pa.schema(
     [
@@ -92,9 +79,9 @@ Label = TypedDict("Label", {
 
 # The patient split schema.
 
-train_split = "train"
-tuning_split = "tuning"
-test_split = "test"
+train_split = "train" # For ML training.
+tuning_split = "tuning" # For ML hyperparameter tuning. Also often called "validation" or "dev".
+held_out_split = "held_out" # For final ML evaluation. Also often called "test".
 
 patient_split = pa.schema(
     [
@@ -107,7 +94,6 @@ patient_split = pa.schema(
 
 # The dataset metadata schema.
 # This is a JSON schema.
-# This data should be stored in dataset_metadata.json within the dataset folder.
 
 
 dataset_metadata = {
@@ -139,7 +125,6 @@ DatasetMetadata = TypedDict(
 
 # The code metadata schema.
 # This is a parquet schema.
-# This data should be stored in code_metadata.parquet within the dataset folder.
 
 def code_metadata_schema(custom_per_code_properties=[]): 
     code_metadata = pa.schema(
