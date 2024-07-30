@@ -18,12 +18,15 @@ from typing_extensions import NotRequired, TypedDict
 # - data/
 #    A (possibly nested) folder containing multiple parquet files containing patient event data following the events_schema folder.
 #    glob("data/**/*.parquet") is the recommended way for obtaining all patient event files.
-# - dataset_metadata.json
-#    Dataset level metadata containing information about the ETL used, data version, etc
-# - (Optional) code_metadata.parquet
-#    Code level metadata containing information about the code descriptions, standard mappings, etc
-# - (Optional) patient_split.csv
-#    A specification of patient splits that should be used.
+# - metadata/
+#    A (possibly nested) folder containing metadata for the dataset. Any files within this folder are optional, but we also specify the format of 3 particularly
+#    important metadata.
+#     * dataset_metadata.json
+#         Dataset level metadata containing information about the ETL used, data version, etc
+#     * (Optional) code_metadata.parquet
+#        Code level metadata containing information about the code descriptions, standard mappings, etc
+#     * (Optional) patient_split.csv
+#        A specification of patient splits that should be used.
 
 ############################################################
 
