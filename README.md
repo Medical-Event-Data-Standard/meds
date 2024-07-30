@@ -85,7 +85,7 @@ In addition, it can contain any number of custom properties to further enrich ob
 function below generates a pyarrow schema for a given set of custom properties.
 
 ```python
-def data_schema(custom_properties=[]):
+def data(custom_properties=[]):
     return pa.schema(
         [
             ("patient_id", pa.int64()),
@@ -181,16 +181,14 @@ DatasetMetadata = TypedDict(
 #### The code metadata schema.
 
 ```python
-def code_metadata_schema(custom_per_code_properties=[]): 
-    code_metadata = pa.schema(
+def code_metadata(custom_per_code_properties=[]): 
+    return pa.schema(
         [
             ("code", pa.string()),
             ("description", pa.string()),
             ("parent_codes", pa.list(pa.string()),
         ] + custom_per_code_properties
     )
-
-    return code_metadata
 
 # Python type for the above schema
 

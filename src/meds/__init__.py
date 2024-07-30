@@ -1,14 +1,14 @@
 from meds._version import __version__  # noqa
 
 from .schema import (
-    data_schema, label, Label, train_split, tuning_split, held_out_split, patient_split, code_metadata,
+    data, label, Label, train_split, tuning_split, held_out_split, patient_split, code_metadata,
     dataset_metadata, CodeMetadata, DatasetMetadata, birth_code, death_code
 )
 
 
 # List all objects that we want to export
 _exported_objects = {
-    'data_schema': data_schema,
+    'data': data,
     'label': label,
     'Label': Label,
     'train_split': train_split,
