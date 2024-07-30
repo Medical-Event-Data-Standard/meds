@@ -55,22 +55,19 @@ MEDS consists of four main data components/schemas:
 Given a MEDS dataset stored in the `$MEDS_ROOT` directory data of the various schemas outlined above can be
 found in the following subfolders:
   - `$MEDS_ROOT/data/`: This directory will contain data in the _patient measurement schema_, organized as a
-    series of possibly nested sharded dataframes, often as `parquet` files. In particular, the file glob
+    series of possibly nested sharded dataframes stored in `parquet` files. In particular, the file glob
     `glob("$MEDS_ROOT/data/**/*.parquet)` will capture all sharded data files of the raw MEDS data, all
     organized into _patient measurement schema_ files, sharded by patient and sorted, for each patient, by
     timestamp.
-  - `$MEDS_ROOT/metadata/codes.csv`: This file contains per-code metadata in the _code metadata schema_
+  - `$MEDS_ROOT/metadata/codes.parquet`: This file contains per-code metadata in the _code metadata schema_
     about the MEDS dataset. As this dataset describes all codes observed in the full MEDS dataset, it is _not_
     sharded. Note that some pre-processing operations may, at times, produce sharded code metadata files, but
     these will always appear in subdirectories of `$MEDS_ROOT/metadata/` rather than at the top level, and
-    should generally not be used for overall metadata operations. The preferred file format for this dataframe
-    is CSV for ease of human inspection and readability.
+    should generally not be used for overall metadata operations.
   - `$MEDS_ROOT/metadata/dataset.json`: This schema contains metadata in the _dataset metadata schema_ about
     the dataset and its production process.
-  - `$MEDS_ROOT/metdata/patient_splits.csv`: This schema contains information in the _patient split schema_
-    about what splits different patients are in. Unlike the raw data, which should preferrably be stored in
-    the parquet format for compression, columnar read capabilities, and compression, the patient splits is
-    preferrably stored in a comma separated value (CSV) format for ease of readability and shareability.
+  - `$MEDS_ROOT/metdata/patient_splits.parquet`: This schema contains information in the _patient split
+    schema_ about what splits different patients are in.
 
 Task label dataframes are stored in the _TODO label_ schema, in a file path that depends on both a
 `$TASK_ROOT` directory where task label dataframes are stored and a `$TASK_NAME` parameter that separates
@@ -84,10 +81,6 @@ in it, thereby rendering the task label directory a deep, nested subdir of `$TAS
 cases, there may be no task labels for a shard of the raw data, if no patient in that shard qualifies for that
 task, in which case it may be true that either `$TASK_ROOT/$TASK_NAME/$SHARD_NAME.parquet` is empty or that it
 does not exist.
-
-While we give preferred file formats in the list above, the important thing about these data are that they are
-stored in the appropriate schemas, not that they use the preferred file formats. Datasets can be stored using
-parquet files for splits or CSV files for raw datasets and still be compliant with the MEDS format.
 
 ### Schemas
 
