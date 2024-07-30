@@ -49,7 +49,7 @@ label = pa.schema(
     [
         ("patient_id", pa.int64()),
          # The patient who is being labeled.
-        
+
         ("prediction_time", pa.timestamp("us")), 
         # The time the prediction is made. 
         # Machine learning models are allowed to use features that have timestamps less than or equal
