@@ -1,73 +1,61 @@
+"""The core schemas for the MEDS format.
+
+Please see the README for more information, including expected file organization on disk, more details on what
+each schema should capture, etc.
+"""
 import datetime
 from typing import Any, List, Mapping, Optional
 
 import pyarrow as pa
 from typing_extensions import NotRequired, TypedDict
 
-# Medical Event Data Standard consists of three main components:
-# 1. A patient data schema
-# 2. A label schema
-# 3. A dataset metadata schema.
-#
-# Patient data and labels are specified using pyarrow. Dataset metadata is specified using JSON.
-
-# We also provide TypedDict Python type signatures for these schemas.
 
 ############################################################
 
-# The patient data schema.
+# The data schema.
+#
+# MEDS data also must satisfy two important properties:
+#
+# 1. Data about a single patient cannot be split across parquet files. If a patient is in a dataset it must be in one and only one parquet file.
+# 2. Data about a single patient must be contiguous within a particular parquet file and sorted by time. 
+
+# Both of these restrictions allow the stream rolling processing (see https://docs.pola.rs/api/python/stable/reference/dataframe/api/polars.DataFrame.rolling.html),
+# which vastly simplifies many data analysis pipelines.
 
 # We define some codes for particularly important events
-birth_code = "SNOMED/184099003"
-death_code = "SNOMED/419620001"
+birth_code = "MEDS_BIRTH"
+death_code = "MEDS_DEATH"
 
-def patient_schema(per_event_properties_schema=pa.null()):
-    # Return a patient schema with a particular per event metadata subschema
-    event = pa.struct(
-        [
-            ("time", pa.timestamp("us")), # Static events will have a null timestamp
-            ("code", pa.string()),
-            ("text_value", pa.string()),
-            ("numeric_value", pa.float32()),
-            ("datetime_value", pa.timestamp("us")),
-            ("properties", per_event_properties_schema),
-        ]
-    )
-
-    patient = pa.schema(
+def data_schema(custom_properties=[]):
+    return pa.schema(
         [
             ("patient_id", pa.int64()),
-            ("events", pa.list_(event)),  # Require ordered by time, nulls must be first
-        ]
+            ("time", pa.timestamp("us")), # Static events will have a null timestamp
+            ("code", pa.string()),
+            ("numeric_value", pa.float32()),
+        ] + custom_properties
     )
 
-    return patient
-
-
-# Python types for the above schema
-
-Event = TypedDict(
-    "Event",
-    {
-        "time": NotRequired[datetime.datetime],
-        "code": str,
-        "text_value": NotRequired[str],
-        "numeric_value": NotRequired[float],
-        "datetime_value": NotRequired[datetime.datetime],
-        "properties": NotRequired[Any],
-    },
-)
-
-Patient = TypedDict("Patient", {"patient_id": int, "events": List[Event]})
+# No python type is provided because Python tools for processing MEDS data will often provide their own types.
+# See https://github.com/EthanSteinberg/meds_reader/blob/0.0.6/src/meds_reader/__init__.pyi#L55 for example.
 
 ############################################################
 
-# The label schema.
+# The label schema. Models, when predicting this label, are allowed to use all data about a patient up to and
+# including the prediction time. Exclusive prediction times are not currently supported, but if you have a use
+# case for them please add a GitHub issue.
 
-label = pa.schema(
+label_schema = pa.schema(
     [
         ("patient_id", pa.int64()),
-        ("prediction_time", pa.timestamp("us")),
+         # The patient who is being labeled.
+
+        ("prediction_time", pa.timestamp("us")), 
+        # The time the prediction is made. 
+        # Machine learning models are allowed to use features that have timestamps less than or equal
+        # to this timestamp.
+
+        # Possible values for the label.
         ("boolean_value", pa.bool_()),
         ("integer_value", pa.int64()),
         ("float_value", pa.float64()),
@@ -84,43 +72,43 @@ Label = TypedDict("Label", {
     "integer_value" : Optional[int],
     "float_value" : Optional[float],
     "categorical_value" : Optional[str],
-})
+}, total=False)
+
+
+############################################################
+
+# The patient split schema.
+
+train_split = "train" # For ML training.
+tuning_split = "tuning" # For ML hyperparameter tuning. Also often called "validation" or "dev".
+held_out_split = "held_out" # For final ML evaluation. Also often called "test".
+
+patient_split_schema = pa.schema(
+    [
+        ("patient_id", pa.int64()),
+        ("split", pa.string()),
+    ]
+)
 
 ############################################################
 
 # The dataset metadata schema.
 # This is a JSON schema.
-# This data should be stored in metadata.json within the dataset folder.
 
-code_metadata_entry = {
-    "type": "object",
-    "properties": {
-        "description": {"type": "string"},
-        "parent_codes": {"type": "array", "items": {"type": "string"}},
-    },
-}
 
-code_metadata = {
-    "type": "object",
-    "additionalProperties": code_metadata_entry,
-}
-
-dataset_metadata = {
+dataset_metadata_schema = {
     "type": "object",
     "properties": {
         "dataset_name": {"type": "string"},
         "dataset_version": {"type": "string"},
         "etl_name": {"type": "string"},
         "etl_version": {"type": "string"},
-        "code_metadata": code_metadata,
         "meds_version": {"type": "string"},
     },
 }
 
-# Python types for the above schema
+# Python type for the above schema
 
-CodeMetadataEntry = TypedDict("CodeMetadataEntry", {"description": str, "parent_codes": List[str]})
-CodeMetadata = Mapping[str, CodeMetadataEntry]
 DatasetMetadata = TypedDict(
     "DatasetMetadata",
     {
@@ -128,7 +116,25 @@ DatasetMetadata = TypedDict(
         "dataset_version": NotRequired[str],
         "etl_name": NotRequired[str],
         "etl_version": NotRequired[str],
-        "code_metadata": NotRequired[CodeMetadata],
         "meds_version": NotRequired[str],
     },
+    total=False,
 )
+
+############################################################
+
+# The code metadata schema.
+# This is a parquet schema.
+
+def code_metadata_schema(custom_per_code_properties=[]): 
+    return pa.schema(
+        [
+            ("code", pa.string()),
+            ("description", pa.string()),
+            ("parent_codes", pa.list_(pa.string())),
+        ] + custom_per_code_properties
+    )
+
+# Python type for the above schema
+
+CodeMetadata = TypedDict("CodeMetadata", {"code": str, "description": str, "parent_codes": List[str]}, total=False)
