@@ -61,7 +61,14 @@ def patient_events_schema(custom_per_event_properties=[]):
 label = pa.schema(
     [
         ("patient_id", pa.int64()),
-        ("prediction_time", pa.timestamp("us")),
+         # The patient who is being labeled.
+        
+        ("prediction_time", pa.timestamp("us")), 
+        # The time the prediction is made. 
+        # Machine learning models are allowed to use features that have timestamps less than or equal
+        # to this timestamp.
+
+        # Possible values for the label.
         ("boolean_value", pa.bool_()),
         ("integer_value", pa.int64()),
         ("float_value", pa.float64()),
