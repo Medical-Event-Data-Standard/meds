@@ -44,7 +44,7 @@ death_code = "MEDS_DEATH"
 def patient_events_schema(custom_per_event_properties=[]):
     return pa.schema(
         [
-            ("patient_id", pa.int64()),   
+            ("patient_id", pa.int64()),
             ("time", pa.timestamp("us")), # Static events will have a null timestamp
             ("code", pa.string()),
             ("numeric_value", pa.float32()),
@@ -95,6 +95,11 @@ patient_split = pa.schema(
         ("split", pa.string()),
     ]
 )
+
+PatientSplit = TypedDict("PatientSplit", {
+    "patient_id": int,
+    "split": str,
+}, total=True)
 
 ############################################################
 
