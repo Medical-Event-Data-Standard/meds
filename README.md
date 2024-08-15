@@ -160,6 +160,7 @@ dataset_metadata = {
         "etl_name": {"type": "string"},
         "etl_version": {"type": "string"},
         "meds_version": {"type": "string"},
+        "created_at": {"type": "string"},
     },
 }
 
@@ -173,6 +174,7 @@ DatasetMetadata = TypedDict(
         "etl_name": NotRequired[str],
         "etl_version": NotRequired[str],
         "meds_version": NotRequired[str],
+        "created_at": NotRequired[str],
     },
     total=False,
 )
