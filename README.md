@@ -160,7 +160,7 @@ dataset_metadata = {
         "etl_name": {"type": "string"},
         "etl_version": {"type": "string"},
         "meds_version": {"type": "string"},
-        "created_at": {"type": "string"},
+        "created_at": {"type": "string"},  # Should be ISO 8601
     },
 }
 
@@ -174,7 +174,7 @@ DatasetMetadata = TypedDict(
         "etl_name": NotRequired[str],
         "etl_version": NotRequired[str],
         "meds_version": NotRequired[str],
-        "created_at": NotRequired[str],
+        "created_at": NotRequired[str],  # Should be ISO 8601
     },
     total=False,
 )
@@ -183,12 +183,21 @@ DatasetMetadata = TypedDict(
 #### The code metadata schema.
 
 ```python
+# Code metadata must contain at least one row for every unique code in the dataset
 def code_metadata(custom_per_code_properties=[]):
     return pa.schema(
         [
             ("code", pa.string()),
+
             ("description", pa.string()),
+
             ("parent_codes", pa.list(pa.string()),
+            # parent_codes must be a list of strings, each string being a higher level
+            # code that represents a generalization of the provided code. Parent codes
+            # can use any structure, but is recommended that they reference OMOP concepts
+            # whenever possible, to enable use of more generic labeling functions and OHDSI tools.
+            # OMOP concepts are referenced in these strings via the format "$VOCABULARY_NAME/$CONCEPT_NAME".
+            # For example: "ICD9CM/487.0" would be a reference to ICD9 code 487.0
         ] + custom_per_code_properties
     )
 

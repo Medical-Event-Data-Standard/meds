@@ -5,13 +5,17 @@ from .schema import (
     DatasetMetadata,
     Label,
     birth_code,
+    code_field,
     code_metadata_schema,
     data_schema,
     dataset_metadata_schema,
     death_code,
     held_out_split,
     label_schema,
+    subject_id_dtype,
+    subject_id_field,
     subject_split_schema,
+    time_field,
     train_split,
     tuning_split,
 )
@@ -31,6 +35,10 @@ _exported_objects = {
     "DatasetMetadata": DatasetMetadata,
     "birth_code": birth_code,
     "death_code": death_code,
+    "subject_id_field": subject_id_field,
+    "time_field": time_field,
+    "code_field": code_field,
+    "subject_id_dtype": subject_id_dtype,
 }
 
 __all__ = list(_exported_objects.keys())
