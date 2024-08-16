@@ -45,7 +45,8 @@ found in the following subfolders:
     organized into _data schema_ files, sharded by subject and sorted, for each subject, by
     time.
   - `$MEDS_ROOT/metadata/codes.parquet`: This file contains per-code metadata in the _code metadata schema_
-    about the MEDS dataset. As this dataset describes all codes observed in the full MEDS dataset, it is _not_
+    about the MEDS dataset. All codes within the dataset should have an entry in this file.
+    As this dataset describes all codes observed in the full MEDS dataset, it is _not_
     sharded. Note that some pre-processing operations may, at times, produce sharded code metadata files, but
     these will always appear in subdirectories of `$MEDS_ROOT/metadata/` rather than at the top level, and
     should generally not be used for overall metadata operations.
