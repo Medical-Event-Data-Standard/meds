@@ -18,7 +18,7 @@ up MEDS, we will define some key terminology that we use in this standard.
      In particular, in almost all structured, longitudinal datasets, a measurement can be described as
      consisting of a tuple containing a `subject_id` (who this measurement is about); a `time` (when this
      measurement happened); some categorical qualifier describing what was measured, which we will call a
-     `code`; a value of a given type, such as a `numerical_value`, a `text_value`, or a `categorical_value`;
+     `code`; a value of a given type, such as a `numeric_value`, a `text_value`, or a `categorical_value`;
      and possibly one or more additional measurement properties that describe the measurement in a
      non-standardized manner.
 
