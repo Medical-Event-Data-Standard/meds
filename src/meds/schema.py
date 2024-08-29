@@ -32,7 +32,10 @@ code_field = "code"
 numeric_value_field = "numeric_value"
 
 subject_id_dtype = pa.int64()
+
+# The time datatype must use "us" as units to match datetime.datetime's internal resolution
 time_dtype = pa.timestamp("us")
+
 code_dtype = pa.string()
 numeric_value_dtype = pa.float32()
 
@@ -60,13 +63,12 @@ def data_schema(custom_properties=[]):
 # case for them please add a GitHub issue.
 
 prediction_time_field = "prediction_time"
-prediction_time_dtype = pa.timestamp("us")
 
 label_schema = pa.schema(
     [
         (subject_id_field, subject_id_dtype),
         # The subject who is being labeled.
-        (prediction_time_field, prediction_time_dtype),
+        (prediction_time_field, time_dtype),
         # The time the prediction is made.
         # Machine learning models are allowed to use features that have timestamps less than or equal
         # to this timestamp.
@@ -98,7 +100,7 @@ Label = TypedDict(
 
 # The subject split schema.
 
-subject_splits_filepath = "metadata/subject_splits.parquet"
+subject_splits_filepath = "subject_splits.parquet"
 
 train_split = "train"  # For ML training.
 tuning_split = "tuning"  # For ML hyperparameter tuning. Also often called "validation" or "dev".
@@ -116,7 +118,7 @@ subject_split_schema = pa.schema(
 # The dataset metadata schema.
 # This is a JSON schema.
 
-dataset_metadata_filepath = "metadata/dataset.json"
+dataset_metadata_filepath = "dataset.json"
 
 dataset_metadata_schema = {
     "type": "object",
@@ -150,7 +152,7 @@ DatasetMetadata = TypedDict(
 # The code metadata schema.
 # This is a parquet schema.
 
-code_metadata_filepath = "metadata/codes.parquet"
+code_metadata_filepath = "codes.parquet"
 
 description_field = "description"
 description_dtype = pa.string()
