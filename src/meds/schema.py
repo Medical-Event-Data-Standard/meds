@@ -4,6 +4,7 @@ Please see the README for more information, including expected file organization
 each schema should capture, etc.
 """
 import datetime
+import os
 from typing import List, Optional
 
 import pyarrow as pa
