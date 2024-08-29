@@ -36,6 +36,7 @@ time_dtype = pa.timestamp("us")
 code_dtype = pa.string()
 numeric_value_dtype = pa.float32()
 
+data_subdirectory = "data"
 
 def data_schema(custom_properties=[]):
     return pa.schema(
@@ -58,11 +59,14 @@ def data_schema(custom_properties=[]):
 # including the prediction time. Exclusive prediction times are not currently supported, but if you have a use
 # case for them please add a GitHub issue.
 
+prediction_time_field = "prediction_time"
+prediction_time_dtype = pa.timestamp("us")
+
 label_schema = pa.schema(
     [
         (subject_id_field, subject_id_dtype),
         # The subject who is being labeled.
-        ("prediction_time", pa.timestamp("us")),
+        (prediction_time_field, prediction_time_dtype),
         # The time the prediction is made.
         # Machine learning models are allowed to use features that have timestamps less than or equal
         # to this timestamp.
@@ -79,8 +83,8 @@ label_schema = pa.schema(
 Label = TypedDict(
     "Label",
     {
-        "subject_id": int,
-        "prediction_time": datetime.datetime,
+        subject_id_field: int,
+        prediction_time_field: datetime.datetime,
         "boolean_value": Optional[bool],
         "integer_value": Optional[int],
         "float_value": Optional[float],
@@ -93,6 +97,8 @@ Label = TypedDict(
 ############################################################
 
 # The subject split schema.
+
+subject_splits_filepath = "metadata/subject_splits.parquet"
 
 train_split = "train"  # For ML training.
 tuning_split = "tuning"  # For ML hyperparameter tuning. Also often called "validation" or "dev".
@@ -109,6 +115,8 @@ subject_split_schema = pa.schema(
 
 # The dataset metadata schema.
 # This is a JSON schema.
+
+dataset_metadata_filepath = "metadata/dataset.json"
 
 dataset_metadata_schema = {
     "type": "object",
@@ -142,14 +150,21 @@ DatasetMetadata = TypedDict(
 # The code metadata schema.
 # This is a parquet schema.
 
+code_metadata_filepath = "metadata/codes.parquet"
+
+description_field = "description"
+description_dtype = pa.string()
+
+parent_codes_field = "parent_codes"
+parent_codes_dtype = pa.list_(pa.string())
 
 # Code metadata must contain at least one row for every unique code in the dataset
 def code_metadata_schema(custom_per_code_properties=[]):
     return pa.schema(
         [
-            ("code", pa.string()),
-            ("description", pa.string()),
-            ("parent_codes", pa.list_(pa.string())),
+            (code_field, code_dtype),
+            (description_field, description_dtype),
+            (parent_codes_field, parent_codes_dtype),
             # parent_codes must be a list of strings, each string being a higher level
             # code that represents a generalization of the provided code. Parent codes
             # can use any structure, but is recommended that they reference OMOP concepts
@@ -163,4 +178,8 @@ def code_metadata_schema(custom_per_code_properties=[]):
 
 # Python type for the above schema
 
-CodeMetadata = TypedDict("CodeMetadata", {"code": str, "description": str, "parent_codes": List[str]}, total=False)
+CodeMetadata = TypedDict(
+    "CodeMetadata",
+    {code_field: str, description_field: str, parent_codes_field: List[str]},
+    total=False
+)
