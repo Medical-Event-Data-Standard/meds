@@ -22,6 +22,8 @@ from typing_extensions import NotRequired, TypedDict
 # Both of these restrictions allow the stream rolling processing (see https://docs.pola.rs/api/python/stable/reference/dataframe/api/polars.DataFrame.rolling.html), # noqa: E501
 # which vastly simplifies many data analysis pipelines.
 
+data_subdirectory = "data"
+
 # We define some codes for particularly important events
 birth_code = "MEDS_BIRTH"
 death_code = "MEDS_DEATH"
@@ -38,8 +40,6 @@ time_dtype = pa.timestamp("us")
 
 code_dtype = pa.string()
 numeric_value_dtype = pa.float32()
-
-data_subdirectory = "data"
 
 def data_schema(custom_properties=[]):
     return pa.schema(
