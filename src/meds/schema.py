@@ -100,7 +100,7 @@ Label = TypedDict(
 
 # The subject split schema.
 
-subject_splits_filepath = "subject_splits.parquet"
+subject_splits_filepath = os.path.join("metadata", "subject_splits.parquet")
 
 train_split = "train"  # For ML training.
 tuning_split = "tuning"  # For ML hyperparameter tuning. Also often called "validation" or "dev".
@@ -118,7 +118,7 @@ subject_split_schema = pa.schema(
 # The dataset metadata schema.
 # This is a JSON schema.
 
-dataset_metadata_filepath = "dataset.json"
+dataset_metadata_filepath = os.path.join("metadata", "dataset.json")
 
 dataset_metadata_schema = {
     "type": "object",
@@ -152,7 +152,7 @@ DatasetMetadata = TypedDict(
 # The code metadata schema.
 # This is a parquet schema.
 
-code_metadata_filepath = "codes.parquet"
+code_metadata_filepath = os.path.join("metadata", "codes.parquet")
 
 description_field = "description"
 description_dtype = pa.string()
