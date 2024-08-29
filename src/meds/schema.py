@@ -29,17 +29,21 @@ death_code = "MEDS_DEATH"
 subject_id_field = "subject_id"
 time_field = "time"
 code_field = "code"
+numeric_value_field = "numeric_value"
 
 subject_id_dtype = pa.int64()
+time_dtype = pa.timestamp("us")
+code_dtype = pa.string()
+numeric_value_dtype = pa.float32()
 
 
 def data_schema(custom_properties=[]):
     return pa.schema(
         [
             (subject_id_field, subject_id_dtype),
-            (time_field, pa.timestamp("us")),  # Static events will have a null timestamp
-            (code_field, pa.string()),
-            ("numeric_value", pa.float32()),
+            (time_field, time_dtype),  # Static events will have a null timestamp
+            (code_field, code_dtype),
+            (numeric_value_field, numeric_value_dtype),
         ]
         + custom_properties
     )
