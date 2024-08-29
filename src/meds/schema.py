@@ -4,6 +4,7 @@ Please see the README for more information, including expected file organization
 each schema should capture, etc.
 """
 import datetime
+import os
 from typing import List, Optional
 
 import pyarrow as pa
@@ -22,6 +23,8 @@ from typing_extensions import NotRequired, TypedDict
 # Both of these restrictions allow the stream rolling processing (see https://docs.pola.rs/api/python/stable/reference/dataframe/api/polars.DataFrame.rolling.html), # noqa: E501
 # which vastly simplifies many data analysis pipelines.
 
+data_subdirectory = "data"
+
 # We define some codes for particularly important events
 birth_code = "MEDS_BIRTH"
 death_code = "MEDS_DEATH"
@@ -29,17 +32,23 @@ death_code = "MEDS_DEATH"
 subject_id_field = "subject_id"
 time_field = "time"
 code_field = "code"
+numeric_value_field = "numeric_value"
 
 subject_id_dtype = pa.int64()
 
+# The time datatype must use "us" as units to match datetime.datetime's internal resolution
+time_dtype = pa.timestamp("us")
+
+code_dtype = pa.string()
+numeric_value_dtype = pa.float32()
 
 def data_schema(custom_properties=[]):
     return pa.schema(
         [
             (subject_id_field, subject_id_dtype),
-            (time_field, pa.timestamp("us")),  # Static events will have a null timestamp
-            (code_field, pa.string()),
-            ("numeric_value", pa.float32()),
+            (time_field, time_dtype),  # Static events will have a null timestamp
+            (code_field, code_dtype),
+            (numeric_value_field, numeric_value_dtype),
         ]
         + custom_properties
     )
@@ -54,11 +63,13 @@ def data_schema(custom_properties=[]):
 # including the prediction time. Exclusive prediction times are not currently supported, but if you have a use
 # case for them please add a GitHub issue.
 
+prediction_time_field = "prediction_time"
+
 label_schema = pa.schema(
     [
         (subject_id_field, subject_id_dtype),
         # The subject who is being labeled.
-        ("prediction_time", pa.timestamp("us")),
+        (prediction_time_field, time_dtype),
         # The time the prediction is made.
         # Machine learning models are allowed to use features that have timestamps less than or equal
         # to this timestamp.
@@ -75,8 +86,8 @@ label_schema = pa.schema(
 Label = TypedDict(
     "Label",
     {
-        "subject_id": int,
-        "prediction_time": datetime.datetime,
+        subject_id_field: int,
+        prediction_time_field: datetime.datetime,
         "boolean_value": Optional[bool],
         "integer_value": Optional[int],
         "float_value": Optional[float],
@@ -89,6 +100,8 @@ Label = TypedDict(
 ############################################################
 
 # The subject split schema.
+
+subject_splits_filepath = os.path.join("metadata", "subject_splits.parquet")
 
 train_split = "train"  # For ML training.
 tuning_split = "tuning"  # For ML hyperparameter tuning. Also often called "validation" or "dev".
@@ -105,6 +118,8 @@ subject_split_schema = pa.schema(
 
 # The dataset metadata schema.
 # This is a JSON schema.
+
+dataset_metadata_filepath = os.path.join("metadata", "dataset.json")
 
 dataset_metadata_schema = {
     "type": "object",
@@ -138,14 +153,21 @@ DatasetMetadata = TypedDict(
 # The code metadata schema.
 # This is a parquet schema.
 
+code_metadata_filepath = os.path.join("metadata", "codes.parquet")
+
+description_field = "description"
+description_dtype = pa.string()
+
+parent_codes_field = "parent_codes"
+parent_codes_dtype = pa.list_(pa.string())
 
 # Code metadata must contain at least one row for every unique code in the dataset
 def code_metadata_schema(custom_per_code_properties=[]):
     return pa.schema(
         [
-            ("code", pa.string()),
-            ("description", pa.string()),
-            ("parent_codes", pa.list_(pa.string())),
+            (code_field, code_dtype),
+            (description_field, description_dtype),
+            (parent_codes_field, parent_codes_dtype),
             # parent_codes must be a list of strings, each string being a higher level
             # code that represents a generalization of the provided code. Parent codes
             # can use any structure, but is recommended that they reference OMOP concepts
@@ -159,4 +181,8 @@ def code_metadata_schema(custom_per_code_properties=[]):
 
 # Python type for the above schema
 
-CodeMetadata = TypedDict("CodeMetadata", {"code": str, "description": str, "parent_codes": List[str]}, total=False)
+CodeMetadata = TypedDict(
+    "CodeMetadata",
+    {code_field: str, description_field: str, parent_codes_field: List[str]},
+    total=False
+)
