@@ -52,7 +52,7 @@ found in the following subfolders:
     should generally not be used for overall metadata operations.
   - `$MEDS_ROOT/metadata/dataset.json`: This schema contains metadata in the _dataset metadata schema_ about
     the dataset and its production process.
-  - `$MEDS_ROOT/metdata/subject_splits.parquet`: This schema contains information in the _subject split
+  - `$MEDS_ROOT/metadata/subject_splits.parquet`: This schema contains information in the _subject split
     schema_ about what splits different subjects are in.
 
 Task label dataframes are stored in the `label_schema`, in a file path that depends on both a
