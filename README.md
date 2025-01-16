@@ -2,7 +2,8 @@
 
 The Medical Event Data Standard (MEDS) is a data schema for storing streams of medical events, often
 sourced from either Electronic Health Records or claims records. Before we define the various schema that make
-up MEDS, we will define some key terminology that we use in this standard.
+up MEDS, we will define some key terminology that we use in this standard. For more information, tutorials, and 
+compatible tools see the website: https://medical-event-data-standard.github.io/.
 
 ## Terminology
   1. A _subject_ in a MEDS dataset is the primary entity being described by the sequences of care observations
