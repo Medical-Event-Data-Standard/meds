@@ -129,7 +129,11 @@ dataset_metadata_schema = {
         "etl_name": {"type": "string"},
         "etl_version": {"type": "string"},
         "meds_version": {"type": "string"},
-        "created_at": {"type": "string"},  # Should be ISO 8601
+        "created_at": {"type": "string"},
+        "license": {"type": "string"},
+        "location_uri": {"type": "string"},
+        "description_uri": {"type": "string"},
+        "extension_columns": {"type": "array", "items": {"type": "string"}} # Should be ISO 8601
     },
 }
 
@@ -138,17 +142,16 @@ dataset_metadata_schema = {
 DatasetMetadata = TypedDict(
     "DatasetMetadata",
     {
-        "dataset_name": NotRequired[str],
-        "dataset_version": NotRequired[str],
-        "etl_name": NotRequired[str],
-        "etl_version": NotRequired[str],
-        "meds_version": NotRequired[str],
-        "created_at": NotRequired[str],  
-        "license": NotRequired[str],
-        "location_uri": NotRequired[str],
-        "description_uri": NotRequired[str],
-        "extension_columns": NotRequired[List[str]]
-        # Should be ISO 8601
+        "dataset_name": NotRequired[str],  # The name of the dataset
+        "dataset_version": NotRequired[str],  # The version of the dataset
+        "etl_name": NotRequired[str],  # The name of the ETL process
+        "etl_version": NotRequired[str],  # The version of the ETL process
+        "meds_version": NotRequired[str],  # The version of the MEDS format
+        "created_at": NotRequired[str],  # The creation date in ISO 8601 format
+        "license": NotRequired[str],  # The license of the dataset
+        "location_uri": NotRequired[str],  # The URI of the dataset location
+        "description_uri": NotRequired[str],  # The URI of the dataset description
+        "extension_columns": NotRequired[List[str]]  # List of additional columns not in standard schema
     },
     total=False,
 )
