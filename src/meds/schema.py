@@ -143,7 +143,12 @@ DatasetMetadata = TypedDict(
         "etl_name": NotRequired[str],
         "etl_version": NotRequired[str],
         "meds_version": NotRequired[str],
-        "created_at": NotRequired[str],  # Should be ISO 8601
+        "created_at": NotRequired[str],  
+        "license": NotRequired[str],
+        "location_uri": NotRequired[str],
+        "description_uri": NotRequired[str],
+        "extension_columns": NotRequired[List[str]]
+        # Should be ISO 8601
     },
     total=False,
 )
