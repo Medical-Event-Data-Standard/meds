@@ -42,6 +42,7 @@ time_dtype = pa.timestamp("us")
 code_dtype = pa.string()
 numeric_value_dtype = pa.float32()
 
+
 def data_schema(custom_properties=[]):
     return pa.schema(
         [
@@ -133,7 +134,7 @@ dataset_metadata_schema = {
         "license": {"type": "string"},
         "location_uri": {"type": "string"},
         "description_uri": {"type": "string"},
-        "extension_columns": {"type": "array", "items": {"type": "string"}} # Should be ISO 8601
+        "extension_columns": {"type": "array", "items": {"type": "string"}},  # Should be ISO 8601
     },
 }
 
@@ -151,7 +152,7 @@ DatasetMetadata = TypedDict(
         "license": NotRequired[str],  # The license of the dataset
         "location_uri": NotRequired[str],  # The URI of the dataset location
         "description_uri": NotRequired[str],  # The URI of the dataset description
-        "extension_columns": NotRequired[List[str]]  # List of additional columns not in standard schema
+        "extension_columns": NotRequired[List[str]],  # List of additional columns not in standard schema
     },
     total=False,
 )
@@ -168,6 +169,7 @@ description_dtype = pa.string()
 
 parent_codes_field = "parent_codes"
 parent_codes_dtype = pa.list_(pa.string())
+
 
 # Code metadata must contain at least one row for every unique code in the dataset
 def code_metadata_schema(custom_per_code_properties=[]):
@@ -190,7 +192,5 @@ def code_metadata_schema(custom_per_code_properties=[]):
 # Python type for the above schema
 
 CodeMetadata = TypedDict(
-    "CodeMetadata",
-    {code_field: str, description_field: str, parent_codes_field: List[str]},
-    total=False
+    "CodeMetadata", {code_field: str, description_field: str, parent_codes_field: List[str]}, total=False
 )
