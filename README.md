@@ -160,16 +160,16 @@ subject_split = pa.schema(
 dataset_metadata_schema = {
     "type": "object",
     "properties": {
-        "dataset_name": {"type": "string"},
-        "dataset_version": {"type": "string"},
-        "etl_name": {"type": "string"},
-        "etl_version": {"type": "string"},
-        "meds_version": {"type": "string"},
-        "created_at": {"type": "string"},
-        "license": {"type": "string"},
-        "location_uri": {"type": "string"},
-        "description_uri": {"type": "string"},
-        "extension_columns": {"type": "array", "items": {"type": "string"}} # Should be ISO 8601
+        "dataset_name": {"type": "string"},  # The name of the dataset
+        "dataset_version": {"type": "string"},  # The version of the dataset
+        "etl_name": {"type": "string"},  # The name of the ETL process
+        "etl_version": {"type": "string"},  # The version of the ETL process
+        "meds_version": {"type": "string"},  # The version of the MEDS format
+        "created_at": {"type": "string"},  # The creation date in ISO 8601 format
+        "license": {"type": "string"},  # The license of the dataset
+        "location_uri": {"type": "string"},  # The URI of the dataset location
+        "description_uri": {"type": "string"},  # The URI of the dataset description
+        "extension_columns": {"type": "array", "items": {"type": "string"}}  # List of additional columns
     },
 }
 
@@ -187,7 +187,7 @@ DatasetMetadata = TypedDict(
         "license": NotRequired[str],  # The license of the dataset
         "location_uri": NotRequired[str],  # The URI of the dataset location
         "description_uri": NotRequired[str],  # The URI of the dataset description
-        "extension_columns": NotRequired[List[str]]  # List of additional columns not in standard schema
+        "extension_columns": NotRequired[List[str]],  # List of additional columns that are not in the MEDS schema
     },
     total=False,
 )
