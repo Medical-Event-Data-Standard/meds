@@ -4,7 +4,7 @@
 
 The Medical Event Data Standard (MEDS) is a data schema for storing streams of medical events, often
 sourced from either Electronic Health Records or claims records. Before we define the various schema that make
-up MEDS, we will define some key terminology that we use in this standard. For more information, tutorials, and 
+up MEDS, we will define some key terminology that we use in this standard. For more information, tutorials, and
 compatible tools see the website: https://medical-event-data-standard.github.io/.
 
 ## Terminology
@@ -157,15 +157,19 @@ subject_split = pa.schema(
 #### The dataset metadata schema.
 
 ```python
-dataset_metadata = {
+dataset_metadata_schema = {
     "type": "object",
     "properties": {
-        "dataset_name": {"type": "string"},
-        "dataset_version": {"type": "string"},
-        "etl_name": {"type": "string"},
-        "etl_version": {"type": "string"},
-        "meds_version": {"type": "string"},
-        "created_at": {"type": "string"},  # Should be ISO 8601
+        "dataset_name": {"type": "string"},  # The name of the dataset
+        "dataset_version": {"type": "string"},  # The version of the dataset
+        "etl_name": {"type": "string"},  # The name of the ETL process
+        "etl_version": {"type": "string"},  # The version of the ETL process
+        "meds_version": {"type": "string"},  # The version of the MEDS format
+        "created_at": {"type": "string"},  # The creation date in ISO 8601 format
+        "license": {"type": "string"},  # The license of the dataset
+        "location_uri": {"type": "string"},  # The URI of the dataset location
+        "description_uri": {"type": "string"},  # The URI of the dataset description
+        "extension_columns": {"type": "array", "items": {"type": "string"}}  # List of additional columns
     },
 }
 
@@ -174,17 +178,35 @@ dataset_metadata = {
 DatasetMetadata = TypedDict(
     "DatasetMetadata",
     {
-        "dataset_name": NotRequired[str],
-        "dataset_version": NotRequired[str],
-        "etl_name": NotRequired[str],
-        "etl_version": NotRequired[str],
-        "meds_version": NotRequired[str],
-        "created_at": NotRequired[str],  # Should be ISO 8601
+        "dataset_name": NotRequired[str],  # The name of the dataset
+        "dataset_version": NotRequired[str],  # The version of the dataset
+        "etl_name": NotRequired[str],  # The name of the ETL process
+        "etl_version": NotRequired[str],  # The version of the ETL process
+        "meds_version": NotRequired[str],  # The version of the MEDS format
+        "created_at": NotRequired[str],  # The creation date in ISO 8601 format
+        "license": NotRequired[str],  # The license of the dataset
+        "location_uri": NotRequired[str],  # The URI of the dataset location
+        "description_uri": NotRequired[str],  # The URI of the dataset description
+        "extension_columns": NotRequired[List[str]],  # List of additional columns that are not in the MEDS schema
     },
     total=False,
 )
 ```
-
+An example for MIMIC-IV would be:
+```python
+DatasetMetadata = {
+    "dataset_name": "MIMIC-IV",
+    "dataset_version": "3.1",
+    "etl_name": "MIMIC-IV ETL",
+    "etl_version": "0.0.3",
+    "meds_version": "0.3.3",
+    "created_at": "2025-01-01T00:00:00",
+    "license": "PhysioNet Credentialed Health Data License 1.5.0",
+    "location_uri": "https://physionet.org/content/mimiciv/",
+    "description_uri": "https://mimic.mit.edu/docs/iv/",
+    "extension_columns": ['insurance', 'language', 'marital_status', 'race', 'hadm_id', 'drg_severity', 'drg_mortality', 'emar_id', 'emar_seq', 'priority', 'route', 'frequency', 'doses_per_24_hrs', 'poe_id', 'icustay_id', 'order_id', 'link_order_id', 'unit', 'ordercategorydescription', 'statusdescription']
+}
+```
 #### The code metadata schema.
 
 ```python

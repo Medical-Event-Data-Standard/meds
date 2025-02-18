@@ -42,6 +42,7 @@ time_dtype = pa.timestamp("us")
 code_dtype = pa.string()
 numeric_value_dtype = pa.float32()
 
+
 def data_schema(custom_properties=[]):
     return pa.schema(
         [
@@ -124,12 +125,16 @@ dataset_metadata_filepath = os.path.join("metadata", "dataset.json")
 dataset_metadata_schema = {
     "type": "object",
     "properties": {
-        "dataset_name": {"type": "string"},
-        "dataset_version": {"type": "string"},
-        "etl_name": {"type": "string"},
-        "etl_version": {"type": "string"},
-        "meds_version": {"type": "string"},
-        "created_at": {"type": "string"},  # Should be ISO 8601
+        "dataset_name": {"type": "string"},  # The name of the dataset
+        "dataset_version": {"type": "string"},  # The version of the dataset
+        "etl_name": {"type": "string"},  # The name of the ETL process
+        "etl_version": {"type": "string"},  # The version of the ETL process
+        "meds_version": {"type": "string"},  # The version of the MEDS format
+        "created_at": {"type": "string"},  # The creation date in ISO 8601 format
+        "license": {"type": "string"},  # The license of the dataset
+        "location_uri": {"type": "string"},  # The URI of the dataset location
+        "description_uri": {"type": "string"},  # The URI of the dataset description
+        "extension_columns": {"type": "array", "items": {"type": "string"}}  # List of additional columns
     },
 }
 
@@ -138,12 +143,16 @@ dataset_metadata_schema = {
 DatasetMetadata = TypedDict(
     "DatasetMetadata",
     {
-        "dataset_name": NotRequired[str],
-        "dataset_version": NotRequired[str],
-        "etl_name": NotRequired[str],
-        "etl_version": NotRequired[str],
-        "meds_version": NotRequired[str],
-        "created_at": NotRequired[str],  # Should be ISO 8601
+        "dataset_name": NotRequired[str],  # The name of the dataset
+        "dataset_version": NotRequired[str],  # The version of the dataset
+        "etl_name": NotRequired[str],  # The name of the ETL process
+        "etl_version": NotRequired[str],  # The version of the ETL process
+        "meds_version": NotRequired[str],  # The version of the MEDS format
+        "created_at": NotRequired[str],  # The creation date in ISO 8601 format
+        "license": NotRequired[str],  # The license of the dataset
+        "location_uri": NotRequired[str],  # The URI of the dataset location
+        "description_uri": NotRequired[str],  # The URI of the dataset description
+        "extension_columns": NotRequired[List[str]],  # List of additional columns that are not in the MEDS schema
     },
     total=False,
 )
@@ -160,6 +169,7 @@ description_dtype = pa.string()
 
 parent_codes_field = "parent_codes"
 parent_codes_dtype = pa.list_(pa.string())
+
 
 # Code metadata must contain at least one row for every unique code in the dataset
 def code_metadata_schema(custom_per_code_properties=[]):
@@ -182,7 +192,5 @@ def code_metadata_schema(custom_per_code_properties=[]):
 # Python type for the above schema
 
 CodeMetadata = TypedDict(
-    "CodeMetadata",
-    {code_field: str, description_field: str, parent_codes_field: List[str]},
-    total=False
+    "CodeMetadata", {code_field: str, description_field: str, parent_codes_field: List[str]}, total=False
 )
