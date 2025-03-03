@@ -26,7 +26,16 @@ from typing_extensions import NotRequired, TypedDict
 data_subdirectory = "data"
 
 # We define some codes for particularly important events
-birth_code = "MEDS_BIRTH"
+class BirthCode:
+    def __init__(self, *codes):
+        self.codes = set(codes)  # Store multiple codes
+
+    def __eq__(self, other):
+        return other in self.codes  # Allow comparison with multiple codes
+
+    def __repr__(self):
+        return f"BirthCode({self.codes})"
+birth_code = BirthCode("SNOMED/184099003", "SNOMED/3950001")
 death_code = "MEDS_DEATH"
 
 subject_id_field = "subject_id"
