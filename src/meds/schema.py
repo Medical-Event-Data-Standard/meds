@@ -108,7 +108,7 @@ train_split = "train"  # For ML training.
 tuning_split = "tuning"  # For ML hyperparameter tuning. Also often called "validation" or "dev".
 held_out_split = "held_out"  # For final ML evaluation. Also often called "test".
 
-subject_split_schema = pa.schema(
+subject_splits_schema = pa.schema(
     [
         (subject_id_field, subject_id_dtype),
         ("split", pa.string()),
