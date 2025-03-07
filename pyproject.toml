@@ -15,6 +15,15 @@ dependencies = [
     "typing_extensions >= 4.0",
 ]
 
+[project.optional-dependencies]
+dev = ["pre-commit<4"]
+tests = ["pytest", "pytest-cov[toml]"]
+
+[tool.pytest.ini_options]
+addopts = [
+  "--color=yes",
+]
+
 [tool.setuptools_scm]
 version_file = "src/meds/_version.py"
 
