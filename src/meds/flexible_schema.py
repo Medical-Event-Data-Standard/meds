@@ -1,9 +1,10 @@
 """A simple class for flexible schema definition and usage."""
 
-from dataclasses import dataclass, fields, field, asdict, MISSING
-from typing import Optional, Union, get_origin, get_args, ClassVar, Dict, Any, List
-import pyarrow as pa
 import datetime
+from dataclasses import MISSING, asdict, dataclass, field, fields
+from typing import Any, ClassVar, Dict, List, Union, get_args, get_origin
+
+import pyarrow as pa
 
 PYTHON_TO_PYARROW = {
     int: pa.int64(),
@@ -11,6 +12,7 @@ PYTHON_TO_PYARROW = {
     str: pa.string(),
     bool: pa.bool_(),
     datetime.datetime: pa.timestamp("us"),
+    list[str]: pa.list_(pa.string()),  # This likely won't work
 }
 PYTHON_TO_JSON = {
     int: "integer",
@@ -19,10 +21,31 @@ PYTHON_TO_JSON = {
     bool: "boolean",
     datetime.datetime: "string",  # datetime as ISO8601 string
 }
-TIME_FORMAT = "%Y-%m-%dT%H:%M:%S.%fZ" # ISO8601 format
+TIME_FORMAT = "%Y-%m-%dT%H:%M:%S.%fZ"  # ISO8601 format
+
 
 class MEDSValidationError(Exception):
     pass
+
+
+def with_field_names_and_types(cls):
+    """A class decorator that adds field name and PyArrow type attributes to a dataclass.
+
+    This provides a convenient way to access the field names and PyArrow types of a schema class without
+    needing to separately export strings or types.
+
+    An example usage is shown in the docstring of the `Schema` class.
+    """
+
+    for f in fields(cls):
+        if f.name == "_extra_fields":
+            continue
+        setattr(cls, f"{f.name}_name", f.name)
+        base_type = get_args(f.type)[0] if Schema._is_optional(f.type) else f.type
+        arrow_dtype = PYTHON_TO_PYARROW.get(base_type, pa.string())
+        setattr(cls, f"{f.name}_dtype", arrow_dtype)
+    return cls
+
 
 @dataclass
 class Schema:
@@ -34,7 +57,9 @@ class Schema:
     of data conforming to the schema.
 
     Example usage:
-        >>> @dataclass
+        >>> from typing import Optional
+        >>> @with_field_names_and_types
+        ... @dataclass
         ... class Data(Schema):
         ...     allow_extra_columns: ClassVar[bool] = True
         ...     subject_id: int
@@ -42,6 +67,14 @@ class Schema:
         ...     code: str
         ...     numeric_value: Optional[float] = None
         ...     text_value: Optional[str] = None
+        >>> Data.subject_id_name
+        'subject_id'
+        >>> Data.subject_id_dtype
+        DataType(int64)
+        >>> Data.time_name
+        'time'
+        >>> Data.time_dtype
+        TimestampType(timestamp[us])
         >>> data = Data(subject_id=1, time=datetime.datetime(2025, 3, 7, 16), code="A", numeric_value=1.0)
         >>> data # doctest: +NORMALIZE_WHITESPACE
         Data(subject_id=1,
@@ -60,19 +93,53 @@ class Schema:
         ... })
         >>> Data.validate(data_tbl)
         pyarrow.Table
-        _extra_fields: string
         subject_id: int64
         time: timestamp[us]
         code: string
         numeric_value: float
         text_value: string
         ----
-        _extra_fields: [[null,null,null]]
         subject_id: [[1,2,3]]
         time: [[2021-03-01 00:00:00.000000,2021-04-01 00:00:00.000000,2021-05-01 00:00:00.000000]]
         code: [["A","B","C"]]
         numeric_value: [[null,null,null]]
         text_value: [[null,null,null]]
+        >>> data_tbl_with_extra = pa.Table.from_pydict({
+        ...     "time": [
+        ...         datetime.datetime(2021, 3, 1),
+        ...         datetime.datetime(2021, 4, 1),
+        ...     ],
+        ...     "subject_id": [4, 5],
+        ...     "extra_1": ["extra1", "extra2"],
+        ...     "extra_2": [452, 11],
+        ...     "code": ["D", "E"],
+        ... })
+        >>> Data.validate(data_tbl_with_extra)
+        pyarrow.Table
+        subject_id: int64
+        time: timestamp[us]
+        code: string
+        numeric_value: float
+        text_value: string
+        extra_1: string
+        extra_2: int64
+        ----
+        subject_id: [[4,5]]
+        time: [[2021-03-01 00:00:00.000000,2021-04-01 00:00:00.000000]]
+        code: [["D","E"]]
+        numeric_value: [[null,null]]
+        text_value: [[null,null]]
+        extra_1: [["extra1","extra2"]]
+        extra_2: [[452,11]]
+        >>> Data.to_json_schema() # doctest: +NORMALIZE_WHITESPACE
+        {'type': 'object',
+         'properties': {'subject_id': {'type': 'integer'},
+                        'time': {'type': 'string', 'format': 'date-time'},
+                        'code': {'type': 'string'},
+                        'numeric_value': {'type': 'number'},
+                        'text_value': {'type': 'string'}},
+         'required': ['subject_id', 'time', 'code'],
+         'additionalProperties': True}
     """
 
     allow_extra_columns: ClassVar[bool] = True
@@ -83,12 +150,12 @@ class Schema:
         if self.allow_extra_columns:
             # Identify and store any extra fields provided at initialization
             provided_fields = set(self.__dict__.keys())
-            extra_fields = provided_fields - defined_field_names - {'_extra_fields'}
+            extra_fields = provided_fields - defined_field_names - {"_extra_fields"}
             for field_name in extra_fields:
                 self._extra_fields[field_name] = self.__dict__.pop(field_name)
         else:
             provided_fields = set(self.__dict__.keys())
-            extra_fields = provided_fields - defined_field_names - {'_extra_fields'}
+            extra_fields = provided_fields - defined_field_names - {"_extra_fields"}
             if extra_fields:
                 raise MEDSValidationError(f"Unexpected extra fields provided: {extra_fields}")
 
@@ -121,7 +188,8 @@ class Schema:
         return iter(self.keys())
 
     def to_dict(self) -> Dict[str, Any]:
-        return {**asdict(self), **self._extra_fields}
+        out = {**asdict(self), **self._extra_fields}
+        return {k: v for k, v in out.items() if v is not MISSING and v is not None}
 
     @classmethod
     def from_dict(cls, data: Dict[str, Any]):
@@ -152,18 +220,13 @@ class Schema:
 
     @classmethod
     def validate(
-        cls,
-        table: Union[pa.Table, Dict[str, List[Any]]],
-        reorder_columns: bool = True,
-        cast_types: bool = True
+        cls, table: Union[pa.Table, Dict[str, List[Any]]], reorder_columns: bool = True, cast_types: bool = True
     ) -> pa.Table:
         if isinstance(table, dict):
             table = pa.Table.from_pydict(table)
 
         table_cols = set(table.column_names)
-        mandatory_cols = {
-            f.name for f in fields(cls) if not cls._is_optional(f.type)
-        } - {'_extra_fields'}
+        mandatory_cols = {f.name for f in fields(cls) if not cls._is_optional(f.type)} - {"_extra_fields"}
         all_defined_cols = {f.name for f in fields(cls)}
 
         missing_cols = mandatory_cols - table_cols
@@ -176,14 +239,14 @@ class Schema:
 
         # Add missing optional cols with default None
         for f in fields(cls):
+            if f.name == "_extra_fields":
+                continue
             if f.name not in table_cols:
                 length = table.num_rows
                 optional = cls._is_optional(f.type)
                 base_type = get_args(f.type)[0] if optional else f.type
                 arrow_type = PYTHON_TO_PYARROW.get(base_type, pa.string())
-                table = table.append_column(
-                    f.name, pa.array([None] * length, type=arrow_type)
-                )
+                table = table.append_column(f.name, pa.array([None] * length, type=arrow_type))
 
         # Reorder columns
         if reorder_columns:
@@ -195,6 +258,8 @@ class Schema:
         # Cast columns if needed
         if cast_types:
             for f in fields(cls):
+                if f.name == "_extra_fields":
+                    continue
                 optional = cls._is_optional(f.type)
                 base_type = get_args(f.type)[0] if optional else f.type
                 expected_type = PYTHON_TO_PYARROW.get(base_type, pa.string())
@@ -202,9 +267,7 @@ class Schema:
                 if current_type != expected_type:
                     try:
                         table = table.set_column(
-                            table.schema.get_field_index(f.name),
-                            f.name,
-                            table.column(f.name).cast(expected_type)
+                            table.schema.get_field_index(f.name), f.name, table.column(f.name).cast(expected_type)
                         )
                     except pa.ArrowInvalid as e:
                         raise MEDSValidationError(f"Column '{f.name}' cast failed: {e}")
@@ -217,9 +280,11 @@ class Schema:
         required_fields = []
 
         for f in fields(cls):
+            if f.name == "_extra_fields":
+                continue
             optional = cls._is_optional(f.type)
             base_type = get_args(f.type)[0] if optional else f.type
-            json_type = JSON_TYPE_MAP.get(base_type, "string")
+            json_type = PYTHON_TO_JSON.get(base_type, "string")
 
             property_schema = {"type": json_type}
 
@@ -236,7 +301,7 @@ class Schema:
             "type": "object",
             "properties": schema_properties,
             "required": required_fields,
-            "additionalProperties": cls.allow_extra_columns
+            "additionalProperties": cls.allow_extra_columns,
         }
 
         return schema
