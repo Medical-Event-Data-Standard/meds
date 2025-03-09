@@ -16,9 +16,7 @@ from meds import (
 
 
 def test_data_schema():
-    """
-    Test that mock data follows the data schema.
-    """
+    """Test that mock data follows the data schema."""
     # Each element in the list is a row in the table
     raw_data = [
         {
@@ -37,9 +35,7 @@ def test_data_schema():
 
 
 def test_code_metadata_schema():
-    """
-    Test that mock code metadata follows the schema.
-    """
+    """Test that mock code metadata follows the schema."""
     # Each element in the list is a row in the table
     code_metadata = [
         {
@@ -56,9 +52,7 @@ def test_code_metadata_schema():
 
 
 def test_subject_splits_schema():
-    """
-    Test that mock data follows the data schema.
-    """
+    """Test that mock data follows the data schema."""
     # Each element in the list is a row in the table
     subject_splits_data = [
         {"subject_id": 123, "split": train_split},
@@ -72,9 +66,7 @@ def test_subject_splits_schema():
 
 
 def test_label_schema():
-    """
-    Test that mock label data follows the label schema.
-    """
+    """Test that mock label data follows the label schema."""
     # Each element in the list is a row in the table
     label_data = [
         {"subject_id": 123, "prediction_time": datetime.datetime(2020, 1, 1, 12, 0, 0), "boolean_value": True}
@@ -82,25 +74,31 @@ def test_label_schema():
     label_table = pa.Table.from_pylist(label_data, schema=label_schema)
     assert label_table.schema.equals(label_schema), "Label schema does not match"
 
-    label_data = [{"subject_id": 123, "prediction_time": datetime.datetime(2020, 1, 1, 12, 0, 0), "integer_value": 4}]
-    label_table = pa.Table.from_pylist(label_data, schema=label_schema)
-    assert label_table.schema.equals(label_schema), "Label schema does not match"
-
-    label_data = [{"subject_id": 123, "prediction_time": datetime.datetime(2020, 1, 1, 12, 0, 0), "float_value": 0.4}]
+    label_data = [
+        {"subject_id": 123, "prediction_time": datetime.datetime(2020, 1, 1, 12, 0, 0), "integer_value": 4}
+    ]
     label_table = pa.Table.from_pylist(label_data, schema=label_schema)
     assert label_table.schema.equals(label_schema), "Label schema does not match"
 
     label_data = [
-        {"subject_id": 123, "prediction_time": datetime.datetime(2020, 1, 1, 12, 0, 0), "categorical_value": "text"}
+        {"subject_id": 123, "prediction_time": datetime.datetime(2020, 1, 1, 12, 0, 0), "float_value": 0.4}
+    ]
+    label_table = pa.Table.from_pylist(label_data, schema=label_schema)
+    assert label_table.schema.equals(label_schema), "Label schema does not match"
+
+    label_data = [
+        {
+            "subject_id": 123,
+            "prediction_time": datetime.datetime(2020, 1, 1, 12, 0, 0),
+            "categorical_value": "text",
+        }
     ]
     label_table = pa.Table.from_pylist(label_data, schema=label_schema)
     assert label_table.schema.equals(label_schema), "Label schema does not match"
 
 
 def test_dataset_metadata_schema():
-    """
-    Test that mock metadata follows dataset_metadata schema.
-    """
+    """Test that mock metadata follows dataset_metadata schema."""
     metadata = {
         "dataset_name": "Test Dataset",
         "dataset_version": "1.0",
