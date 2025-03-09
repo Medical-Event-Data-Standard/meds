@@ -6,7 +6,7 @@ each schema should capture, etc.
 import datetime
 import os
 from dataclasses import dataclass
-from typing import ClassVar, List, Optional
+from typing import ClassVar
 
 from .flexible_schema import Schema, with_field_names_and_types
 
@@ -36,7 +36,7 @@ class Data(Schema):
     subject_id: int
     time: datetime.datetime
     code: str
-    numeric_value: Optional[float] = None
+    numeric_value: float | None = None
 
 
 ############################################################
@@ -50,10 +50,10 @@ class Label(Schema):
     allow_extra_columns: ClassVar[bool] = False
     subject_id: int
     prediction_time: datetime.datetime
-    boolean_value: Optional[bool] = None
-    integer_value: Optional[int] = None
-    float_value: Optional[float] = None
-    categorical_value: Optional[str] = None
+    boolean_value: bool | None = None
+    integer_value: int | None = None
+    float_value: float | None = None
+    categorical_value: str | None = None
 
 
 ############################################################
@@ -86,16 +86,16 @@ dataset_metadata_filepath = os.path.join("metadata", "dataset.json")
 @with_field_names_and_types
 @dataclass
 class DatasetMetadata(Schema):
-    dataset_name: Optional[str] = None
-    dataset_version: Optional[str] = None
-    etl_name: Optional[str] = None
-    etl_version: Optional[str] = None
-    meds_version: Optional[str] = None
-    created_at: Optional[datetime.datetime] = None
-    license: Optional[str] = None
-    location_uri: Optional[str] = None
-    description_uri: Optional[str] = None
-    extension_columns: Optional[List[str]] = None
+    dataset_name: str | None = None
+    dataset_version: str | None = None
+    etl_name: str | None = None
+    etl_version: str | None = None
+    meds_version: str | None = None
+    created_at: datetime.datetime | None = None
+    license: str | None = None
+    location_uri: str | None = None
+    description_uri: str | None = None
+    extension_columns: list[str] | None = None
 
 
 ############################################################
