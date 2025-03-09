@@ -9,7 +9,7 @@ from meds import (
     dataset_metadata_schema,
     held_out_split,
     label_schema,
-    subject_split_schema,
+    subject_splits_schema,
     train_split,
     tuning_split,
 )
@@ -51,18 +51,18 @@ def test_code_metadata_schema():
     assert table.schema.equals(schema), "Code metadata schema does not match"
 
 
-def test_subject_split_schema():
+def test_subject_splits_schema():
     """Test that mock data follows the data schema."""
     # Each element in the list is a row in the table
-    subject_split_data = [
+    subject_splits_data = [
         {"subject_id": 123, "split": train_split},
         {"subject_id": 123, "split": tuning_split},
         {"subject_id": 123, "split": held_out_split},
         {"subject_id": 123, "split": "special"},
     ]
 
-    table = pa.Table.from_pylist(subject_split_data, schema=subject_split_schema)
-    assert table.schema.equals(subject_split_schema), "subject split schema does not match"
+    table = pa.Table.from_pylist(subject_splits_data, schema=subject_splits_schema)
+    assert table.schema.equals(subject_splits_schema), "subject split schema does not match"
 
 
 def test_label_schema():
