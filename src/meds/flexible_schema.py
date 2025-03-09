@@ -1,8 +1,9 @@
 """A simple class for flexible schema definition and usage."""
 
 import datetime
+import types
 from dataclasses import MISSING, asdict, dataclass, field, fields
-from typing import Any, ClassVar, Dict, List, Union, get_args, get_origin
+from typing import Any, ClassVar, Union, get_args, get_origin
 
 import pyarrow as pa
 
@@ -143,7 +144,7 @@ class Schema:
     """
 
     allow_extra_columns: ClassVar[bool] = True
-    _extra_fields: Dict[str, Any] = field(default_factory=dict, init=False, repr=False)
+    _extra_fields: dict[str, Any] = field(default_factory=dict, init=False, repr=False)
 
     def __post_init__(self):
         defined_field_names = {f.name for f in fields(self)}
@@ -187,12 +188,12 @@ class Schema:
     def __iter__(self):
         return iter(self.keys())
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         out = {**asdict(self), **self._extra_fields}
         return {k: v for k, v in out.items() if v is not MISSING and v is not None}
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]):
+    def from_dict(cls, data: dict[str, Any]):
         field_names = {f.name for f in fields(cls)}
         known_fields = {k: v for k, v in data.items() if k in field_names}
         instance = cls(**known_fields)
@@ -204,9 +205,20 @@ class Schema:
                 raise MEDSValidationError(f"Unexpected extra fields provided: {set(extra_fields)}")
         return instance
 
+    # @classmethod
+    # def _is_optional(cls, annotation) -> bool:
+    #    if get_origin(annotation) is Union:
+    #        return type(None) in get_args(annotation)
+    #    elif hasattr(annotation, "__origin__"):
+    #        # Handles typing.Optional from earlier Python versions
+    #        return annotation.__origin__ is Union and type(None) in annotation.__args__
+    #    return False
+
     @classmethod
     def _is_optional(cls, annotation) -> bool:
-        return get_origin(annotation) is Union and type(None) in get_args(annotation)
+        origin = get_origin(annotation)
+
+        return (origin is Union or origin is types.UnionType) and type(None) in get_args(annotation)
 
     @classmethod
     def pyarrow_schema(cls) -> pa.Schema:
@@ -220,7 +232,10 @@ class Schema:
 
     @classmethod
     def validate(
-        cls, table: Union[pa.Table, Dict[str, List[Any]]], reorder_columns: bool = True, cast_types: bool = True
+        cls,
+        table: pa.Table | dict[str, list[Any]],
+        reorder_columns: bool = True,
+        cast_types: bool = True,
     ) -> pa.Table:
         if isinstance(table, dict):
             table = pa.Table.from_pydict(table)
@@ -267,7 +282,9 @@ class Schema:
                 if current_type != expected_type:
                     try:
                         table = table.set_column(
-                            table.schema.get_field_index(f.name), f.name, table.column(f.name).cast(expected_type)
+                            table.schema.get_field_index(f.name),
+                            f.name,
+                            table.column(f.name).cast(expected_type),
                         )
                     except pa.ArrowInvalid as e:
                         raise MEDSValidationError(f"Column '{f.name}' cast failed: {e}")
@@ -275,7 +292,7 @@ class Schema:
         return table
 
     @classmethod
-    def to_json_schema(cls) -> Dict[str, Any]:
+    def to_json_schema(cls) -> dict[str, Any]:
         schema_properties = {}
         required_fields = []
 
