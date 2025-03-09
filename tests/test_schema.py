@@ -55,17 +55,17 @@ def test_code_metadata_schema():
     CodeMetadata.validate(pa.Table.from_pylist(code_metadata))
 
 
-def test_subject_split_schema():
+def test_subject_splits_schema():
     """Test that mock data follows the data schema."""
     # Each element in the list is a row in the table
-    subject_split_data = [
+    subject_splits_data = [
         {"subject_id": 123, "split": train_split},
         {"subject_id": 123, "split": tuning_split},
         {"subject_id": 123, "split": held_out_split},
         {"subject_id": 123, "split": "special"},
     ]
 
-    SubjectSplit.validate(pa.Table.from_pylist(subject_split_data))
+    SubjectSplit.validate(pa.Table.from_pylist(subject_splits_data))
 
 
 def test_label_schema():
