@@ -179,10 +179,11 @@ Three sentinel split names are defined for convenience and shared processing:
 
 Additional split names can be used by the user as desired.
 
-```
+```python
 train_split = "train"
 tuning_split = "tuning"
 held_out_split = "held_out"
+
 
 class SubjectSplit(PyArrowSchema):
     allow_extra_columns: ClassVar[bool] = False
