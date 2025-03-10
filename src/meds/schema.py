@@ -44,6 +44,7 @@ class Data(PyArrowSchema):
 
 class Label(PyArrowSchema):
     allow_extra_columns: ClassVar[bool] = False
+
     subject_id: pa.int64()
     prediction_time: pa.timestamp("us")  # noqa: F821 -- this seems to be a flake error
     boolean_value: Optional(pa.bool_()) = None
@@ -65,6 +66,7 @@ held_out_split = "held_out"  # For final ML evaluation. Also often called "test"
 
 class SubjectSplit(PyArrowSchema):
     allow_extra_columns: ClassVar[bool] = False
+
     subject_id: pa.int64()
     split: pa.string()
 

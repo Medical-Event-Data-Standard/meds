@@ -24,7 +24,7 @@ dependencies = [
     "pyarrow >= 8",
     "jsonschema >= 4.0.0",
     "typing_extensions >= 4.0",
-    "flexible_schema == 0.0.2",
+    "flexible_schema == 0.0.3",
 ]
 
 [project.urls]

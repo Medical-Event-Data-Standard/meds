@@ -111,9 +111,9 @@ def test_dataset_metadata_schema():
     }
 
     try:
-        jsonschema.validate(instance=metadata, schema=DatasetMetadata.to_json_schema())
+        jsonschema.validate(instance=metadata, schema=DatasetMetadata.schema())
 
         dataset_metadata = DatasetMetadata(**metadata)
-        jsonschema.validate(instance=dataset_metadata.to_dict(), schema=DatasetMetadata.to_json_schema())
+        jsonschema.validate(instance=dataset_metadata.to_dict(), schema=DatasetMetadata.schema())
     except Exception as e:
         raise AssertionError(f"Dataset metadata does not follow schema: {e}") from e

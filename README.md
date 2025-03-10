@@ -94,27 +94,57 @@ MEDS data also must satisfy two important properties:
     in one and only one parquet file.
 2. Data about a single subject must be contiguous within a particular parquet file and sorted by time.
 
-The data schema has four mandatory fields:
+The data schema has four fields that will appear in every MEDS dataset data file:
 
 1. `subject_id`: The ID of the subject this event is about.
 2. `time`: The time of the event. This field is nullable for static events.
 3. `code`: The code of the event.
 4. `numeric_value`: The numeric value of the event. This field is nullable for non-numeric events.
 
-In addition, it can contain any number of custom properties to further enrich observations. The python
-function below generates a pyarrow schema for a given set of custom properties.
+In addition, it can contain any number of custom properties to further enrich observations. This is reflected
+programmatically using the [`flexible_schema`](<>) package as the below schema:
 
 ```python
-def data_schema(custom_properties=[]):
-    return pa.schema(
-        [
-            (subject_id_field, subject_id_dtype),
-            (time_field, time_dtype),  # Static events will have a null timestamp
-            (code_field, code_dtype),
-            (numeric_value_field, numeric_value_dtype),
-        ]
-        + custom_properties
-    )
+class Data(PyArrowSchema):
+    subject_id: pa.int64()
+    time: pa.timestamp("us")  # noqa: F821 -- this seems to be a flake error
+    code: pa.string()
+    numeric_value: Optional(pa.float32()) = None
+```
+
+This schema can be used to generate the mandatory schema elements and/or validate or enforce a complaint MEDS
+schema via the `.validate()` method:
+
+```python
+>>> import pyarrow as pa
+>>> import datetime
+>>> from meds import Data
+>>> Data.schema()
+subject_id: int64
+time: timestamp[us]
+code: string
+numeric_value: float
+>>> data_tbl = pa.Table.from_pydict({
+...     "code": ["A", "B", "C"],
+...     "subject_id": [1, 2, 3],
+...     "time": [
+...         datetime.datetime(2021, 3, 1),
+...         datetime.datetime(2021, 4, 1),
+...         datetime.datetime(2021, 5, 1),
+...     ],
+... })
+>>> Data.validate(data_tbl)
+pyarrow.Table
+subject_id: int64
+time: timestamp[us]
+code: string
+numeric_value: float
+----
+subject_id: [[1,2,3]]
+time: [[2021-03-01 00:00:00.000000,2021-04-01 00:00:00.000000,2021-05-01 00:00:00.000000]]
+code: [["A","B","C"]]
+numeric_value: [[null,null,null]]
+
 ```
 
 #### The label schema.
@@ -124,29 +154,15 @@ prediction time. Exclusive prediction times are not currently supported, but if 
 please add a GitHub issue.
 
 ```python
-label = pa.schema(
-    [
-        ("subject_id", pa.int64()),
-        ("prediction_time", pa.timestamp("us")),
-        ("boolean_value", pa.bool_()),
-        ("integer_value", pa.int64()),
-        ("float_value", pa.float64()),
-        ("categorical_value", pa.string()),
-    ]
-)
+class Label(PyArrowSchema):
+    allow_extra_columns: ClassVar[bool] = False
 
-Label = TypedDict(
-    "Label",
-    {
-        "subject_id": int,
-        "prediction_time": datetime.datetime,
-        "boolean_value": Optional[bool],
-        "integer_value": Optional[int],
-        "float_value": Optional[float],
-        "categorical_value": Optional[str],
-    },
-    total=False,
-)
+    subject_id: pa.int64()
+    prediction_time: pa.timestamp("us")
+    boolean_value: Optional(pa.bool_()) = None
+    integer_value: Optional(pa.int64()) = None
+    float_value: Optional(pa.float32()) = None
+    categorical_value: Optional(pa.string()) = None
 ```
 
 #### The subject split schema.
@@ -168,56 +184,48 @@ train_split = "train"
 tuning_split = "tuning"
 held_out_split = "held_out"
 
-subject_split = pa.schema(
-    [
-        ("subject_id", pa.int64()),
-        ("split", pa.string()),
-    ]
-)
+class SubjectSplit(PyArrowSchema):
+    allow_extra_columns: ClassVar[bool] = False
+
+    subject_id: pa.int64()
+    split: pa.string()
 ```
 
 #### The dataset metadata schema.
 
 ```python
-dataset_metadata_schema = {
-    "type": "object",
-    "properties": {
-        "dataset_name": {"type": "string"},  # The name of the dataset
-        "dataset_version": {"type": "string"},  # The version of the dataset
-        "etl_name": {"type": "string"},  # The name of the ETL process
-        "etl_version": {"type": "string"},  # The version of the ETL process
-        "meds_version": {"type": "string"},  # The version of the MEDS format
-        "created_at": {"type": "string"},  # The creation date in ISO 8601 format
-        "license": {"type": "string"},  # The license of the dataset
-        "location_uri": {"type": "string"},  # The URI of the dataset location
-        "description_uri": {"type": "string"},  # The URI of the dataset description
-        "extension_columns": {
-            "type": "array",
-            "items": {"type": "string"},
-        },  # List of additional columns
-    },
-}
+class DatasetMetadata(JSONSchema):
+    dataset_name: Optional(str) = None
+    dataset_version: Optional(str) = None
+    etl_name: Optional(str) = None
+    etl_version: Optional(str) = None
+    meds_version: Optional(str) = None
+    created_at: Optional(datetime.datetime) = None
+    license: Optional(str) = None
+    location_uri: Optional(str) = None
+    description_uri: Optional(str) = None
+    extension_columns: Optional(list[str]) = None
+```
 
-# Python type for the above schema
+This can be used to generate a JSON schema for the dataset metadata via the `.to_json_schema()` method:
 
-DatasetMetadata = TypedDict(
-    "DatasetMetadata",
-    {
-        "dataset_name": NotRequired[str],  # The name of the dataset
-        "dataset_version": NotRequired[str],  # The version of the dataset
-        "etl_name": NotRequired[str],  # The name of the ETL process
-        "etl_version": NotRequired[str],  # The version of the ETL process
-        "meds_version": NotRequired[str],  # The version of the MEDS format
-        "created_at": NotRequired[str],  # The creation date in ISO 8601 format
-        "license": NotRequired[str],  # The license of the dataset
-        "location_uri": NotRequired[str],  # The URI of the dataset location
-        "description_uri": NotRequired[str],  # The URI of the dataset description
-        "extension_columns": NotRequired[
-            List[str]
-        ],  # List of additional columns that are not in the MEDS schema
-    },
-    total=False,
-)
+```python
+>>> from meds import DatasetMetadata
+>>> DatasetMetadata.schema() # doctest: +NORMALIZE_WHITESPACE
+{'type': 'object',
+ 'properties': {'dataset_name': {'type': 'string'},
+                'dataset_version': {'type': 'string'},
+                'etl_name': {'type': 'string'},
+                'etl_version': {'type': 'string'},
+                'meds_version': {'type': 'string'},
+                'created_at': {'type': 'string', 'format': 'date-time'},
+                'license': {'type': 'string'},
+                'location_uri': {'type': 'string'},
+                'description_uri': {'type': 'string'},
+                'extension_columns': {'type': 'array', 'items': {'type': 'string'}}},
+ 'required': [],
+ 'additionalProperties': True}
+
 ```
 
 An example for MIMIC-IV would be:
@@ -261,25 +269,8 @@ DatasetMetadata = {
 #### The code metadata schema.
 
 ```python
-# Code metadata must contain at least one row for every unique code in the dataset
-def code_metadata(custom_per_code_properties=[]):
-    return pa.schema(
-        [
-            ("code", pa.string()),
-
-            ("description", pa.string()),
-
-            ("parent_codes", pa.list(pa.string()),
-            # parent_codes must be a list of strings, each string being a higher level
-            # code that represents a generalization of the provided code. Parent codes
-            # can use any structure, but is recommended that they reference OMOP concepts
-            # whenever possible, to enable use of more generic labeling functions and OHDSI tools.
-            # OMOP concepts are referenced in these strings via the format "$VOCABULARY_NAME/$CONCEPT_NAME".
-            # For example: "ICD9CM/487.0" would be a reference to ICD9 code 487.0
-        ] + custom_per_code_properties
-    )
-
-# Python type for the above schema
-
-CodeMetadata = TypedDict("CodeMetadata", {"code": str, "description": str, "parent_codes": List[str]}, total=False)
+class CodeMetadata(PyArrowSchema):
+    code: pa.string()
+    description: pa.string()
+    parent_codes: pa.list_(pa.string())
 ```
