@@ -5,10 +5,9 @@ each schema should capture, etc.
 """
 import datetime
 import os
-from dataclasses import dataclass
 from typing import ClassVar
 
-from .flexible_schema import Schema, with_field_names_and_types
+from flexible_schema import JSONSchema, PyArrowSchema
 
 ############################################################
 
@@ -30,13 +29,11 @@ birth_code = "MEDS_BIRTH"
 death_code = "MEDS_DEATH"
 
 
-@with_field_names_and_types
-@dataclass
-class Data(Schema):
+class Data(PyArrowSchema):
     subject_id: int
     time: datetime.datetime
     code: str
-    numeric_value: float | None = None
+    numeric_value: str | None = None
 
 
 ############################################################
@@ -44,9 +41,7 @@ class Data(Schema):
 # The label schema.
 
 
-@with_field_names_and_types
-@dataclass
-class Label(Schema):
+class Label(PyArrowSchema):
     allow_extra_columns: ClassVar[bool] = False
     subject_id: int
     prediction_time: datetime.datetime
@@ -67,9 +62,7 @@ tuning_split = "tuning"  # For ML hyperparameter tuning. Also often called "vali
 held_out_split = "held_out"  # For final ML evaluation. Also often called "test".
 
 
-@with_field_names_and_types
-@dataclass
-class SubjectSplit(Schema):
+class SubjectSplit(PyArrowSchema):
     allow_extra_columns: ClassVar[bool] = False
     subject_id: int
     split: str
@@ -83,9 +76,7 @@ class SubjectSplit(Schema):
 dataset_metadata_filepath = os.path.join("metadata", "dataset.json")
 
 
-@with_field_names_and_types
-@dataclass
-class DatasetMetadata(Schema):
+class DatasetMetadata(JSONSchema):
     dataset_name: str | None = None
     dataset_version: str | None = None
     etl_name: str | None = None
@@ -106,9 +97,7 @@ class DatasetMetadata(Schema):
 code_metadata_filepath = os.path.join("metadata", "codes.parquet")
 
 
-@with_field_names_and_types
-@dataclass
-class CodeMetadata(Schema):
+class CodeMetadata(PyArrowSchema):
     code: str
     description: str
     parent_codes: list[str]
