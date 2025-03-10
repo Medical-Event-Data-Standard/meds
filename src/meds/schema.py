@@ -7,7 +7,8 @@ import datetime
 import os
 from typing import ClassVar
 
-from flexible_schema import JSONSchema, PyArrowSchema
+import pyarrow as pa
+from flexible_schema import JSONSchema, Optional, PyArrowSchema
 
 ############################################################
 
@@ -30,10 +31,10 @@ death_code = "MEDS_DEATH"
 
 
 class Data(PyArrowSchema):
-    subject_id: int
-    time: datetime.datetime
-    code: str
-    numeric_value: str | None = None
+    subject_id: pa.int64()
+    time: pa.timestamp("us")  # noqa: F821 -- this seems to be a flake error
+    code: pa.string()
+    numeric_value: Optional(pa.float32()) = None
 
 
 ############################################################
@@ -43,12 +44,12 @@ class Data(PyArrowSchema):
 
 class Label(PyArrowSchema):
     allow_extra_columns: ClassVar[bool] = False
-    subject_id: int
-    prediction_time: datetime.datetime
-    boolean_value: bool | None = None
-    integer_value: int | None = None
-    float_value: float | None = None
-    categorical_value: str | None = None
+    subject_id: pa.int64()
+    prediction_time: pa.timestamp("us")  # noqa: F821 -- this seems to be a flake error
+    boolean_value: Optional(pa.bool_()) = None
+    integer_value: Optional(pa.int64()) = None
+    float_value: Optional(pa.float32()) = None
+    categorical_value: Optional(pa.string()) = None
 
 
 ############################################################
@@ -64,8 +65,8 @@ held_out_split = "held_out"  # For final ML evaluation. Also often called "test"
 
 class SubjectSplit(PyArrowSchema):
     allow_extra_columns: ClassVar[bool] = False
-    subject_id: int
-    split: str
+    subject_id: pa.int64()
+    split: pa.string()
 
 
 ############################################################
@@ -77,16 +78,16 @@ dataset_metadata_filepath = os.path.join("metadata", "dataset.json")
 
 
 class DatasetMetadata(JSONSchema):
-    dataset_name: str | None = None
-    dataset_version: str | None = None
-    etl_name: str | None = None
-    etl_version: str | None = None
-    meds_version: str | None = None
-    created_at: datetime.datetime | None = None
-    license: str | None = None
-    location_uri: str | None = None
-    description_uri: str | None = None
-    extension_columns: list[str] | None = None
+    dataset_name: Optional(str) = None
+    dataset_version: Optional(str) = None
+    etl_name: Optional(str) = None
+    etl_version: Optional(str) = None
+    meds_version: Optional(str) = None
+    created_at: Optional(datetime.datetime) = None
+    license: Optional(str) = None
+    location_uri: Optional(str) = None
+    description_uri: Optional(str) = None
+    extension_columns: Optional(list[str]) = None
 
 
 ############################################################
@@ -98,6 +99,6 @@ code_metadata_filepath = os.path.join("metadata", "codes.parquet")
 
 
 class CodeMetadata(PyArrowSchema):
-    code: str
-    description: str
-    parent_codes: list[str]
+    code: pa.string()
+    description: pa.string()
+    parent_codes: pa.list_(pa.string())
