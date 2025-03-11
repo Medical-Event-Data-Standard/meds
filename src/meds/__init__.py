@@ -1,9 +1,7 @@
 from meds._version import __version__  # noqa
 
 from .schema import (
-    CodeMetadata,
     DatasetMetadata,
-    Label,
     birth_code,
     code_dtype,
     code_field,
@@ -46,14 +44,12 @@ _exported_objects = {
     "parent_codes_dtype": parent_codes_dtype,
     "data_schema": data_schema,
     "label_schema": label_schema,
-    "Label": Label,
     "train_split": train_split,
     "tuning_split": tuning_split,
     "held_out_split": held_out_split,
     "subject_splits_schema": subject_splits_schema,
     "code_metadata_schema": code_metadata_schema,
     "dataset_metadata_schema": dataset_metadata_schema,
-    "CodeMetadata": CodeMetadata,
     "DatasetMetadata": DatasetMetadata,
     "birth_code": birth_code,
     "death_code": death_code,

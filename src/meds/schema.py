@@ -3,9 +3,7 @@
 Please see the README for more information, including expected file organization on disk, more details on what
 each schema should capture, etc.
 """
-import datetime
 import os
-from typing import Optional
 
 import pyarrow as pa
 from typing_extensions import NotRequired, TypedDict
@@ -80,21 +78,6 @@ label_schema = pa.schema(
         ("float_value", pa.float64()),
         ("categorical_value", pa.string()),
     ]
-)
-
-# Python types for the above schema
-
-Label = TypedDict(
-    "Label",
-    {
-        subject_id_field: int,
-        prediction_time_field: datetime.datetime,
-        "boolean_value": Optional[bool],
-        "integer_value": Optional[int],
-        "float_value": Optional[float],
-        "categorical_value": Optional[str],
-    },
-    total=False,
 )
 
 
@@ -185,10 +168,3 @@ def code_metadata_schema(custom_per_code_properties=[]):
         ]
         + custom_per_code_properties
     )
-
-
-# Python type for the above schema
-
-CodeMetadata = TypedDict(
-    "CodeMetadata", {code_field: str, description_field: str, parent_codes_field: list[str]}, total=False
-)
