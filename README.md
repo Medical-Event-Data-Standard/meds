@@ -271,28 +271,28 @@ The file glob `glob($TASK_ROOT/$TASK_NAME/**/*.parquet)` is used to capture all 
 
 ## Validation
 
-This schema can be used to generate the mandatory schema elements and/or validate or enforce a compliant MEDS
-schema via the `.validate()` method:
+The schema objects described above can be used to validate a dataset against the MEDS schema via the .validate() method. When you call this method, the input data is checked to ensure it contains all required columns with the correct types. If optional columns (such as numeric_value in the Data schema) are missing, they are automatically added with null values. This guarantees that the validated table conforms to the expected schema.
+
+For example, consider the following code snippet that uses the `Data` schema to validate a made-up data file:
 
 ```python
->>> import pyarrow as pa
->>> import datetime
->>> from meds import Data
->>> Data.schema()
-subject_id: int64
-time: timestamp[us]
-code: string
-numeric_value: float
->>> data_tbl = pa.Table.from_pydict({
-...     "code": ["A", "B", "C"],
-...     "subject_id": [1, 2, 3],
-...     "time": [
-...         datetime.datetime(2021, 3, 1),
-...         datetime.datetime(2021, 4, 1),
-...         datetime.datetime(2021, 5, 1),
-...     ],
-... })
->>> Data.validate(data_tbl)
+import pyarrow as pa
+import datetime
+from meds import Data
+
+data_tbl = pa.Table.from_pydict({
+    "code": ["A", "B", "C"],
+    "subject_id": [1, 2, 3],
+    "time": [
+        datetime.datetime(2021, 3, 1),
+        None,
+        datetime.datetime(2021, 5, 1),
+    ],
+})
+
+Data.validate(data_tbl)
+```
+```console
 pyarrow.Table
 subject_id: int64
 time: timestamp[us]
@@ -300,10 +300,20 @@ code: string
 numeric_value: float
 ----
 subject_id: [[1,2,3]]
-time: [[2021-03-01 00:00:00.000000,2021-04-01 00:00:00.000000,2021-05-01 00:00:00.000000]]
+time: [[2021-03-01 00:00:00.000000,null,2021-05-01 00:00:00.000000]]
 code: [["A","B","C"]]
 numeric_value: [[null,null,null]]
 
+```
+
+In contrast, a DataFrame that does not conform to the schema will raise an error:
+
+```python
+invalid_tbl = data_tbl.select(['subject_id', 'time'])
+Data.validate(invalid_tbl)
+```
+```console
+flexible_schema.base.SchemaValidationError: Missing mandatory columns: {'code'}
 ```
 
 
