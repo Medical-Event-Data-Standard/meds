@@ -45,7 +45,7 @@ This minimalist representation captures the essence of EHR data while providing 
 
 ## The Schemas
 
-MEDS is composed of five primary schema components:
+Building on this philosophy, MEDS defines five primary schema components:
 
 | **Component**         | **Description**                                                                                                                                                           | **Implementation** |
 |------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-------------------------------|
@@ -55,13 +55,14 @@ MEDS is composed of five primary schema components:
 | `SubjectSplit`     | Stores information on how subjects are partitioned into subpopulations (e.g., training, tuning, held-out) for machine learning tasks.                                    | PyArrow schema                |
 | `Label`             | Defines the structure for labels that may be predicted about a subject at specific times in the subject record.                                                           | PyArrow schema                |
 
+
+Below, each schema is introduced in detail. Usage examples and a practical demonstration with the [MIMIC-IV demo](https://physionet.org/content/mimic-iv-demo/2.2/) dataset are provided in a later section.
+
 > [!Important]
-> Each component is implemented as a dataclass via the [`flexible_schema` package](https://github.com/Medical-Event-Data-Standard/flexible_schema) 
+> Each component is implemented as a dataclass via the [`flexible_schema`](https://github.com/Medical-Event-Data-Standard/flexible_schema) package 
 > to provide convenient validation functionality. Under the hood, these are standard PyArrow schemas (for tabular data) or 
 > JSON schemas (for single-entity metadata).
 
-
-Below, each schema is introduced in detail. Usage examples and a practical demonstration with the [MIMIC-IV demo dataset](https://physionet.org/content/mimic-iv-demo/2.2/) dataset are provided in a later section.
 
 
 ### The `Data` schema
@@ -98,7 +99,7 @@ The `DatasetMetadata` schema structures essential information about the source d
 It includes details such as the dataset’s name, version, and licensing, as well as specifics about the ETL process 
 used for transformation.
 
-The key fields defined in this schema are:
+The key fields defined in this schema are, all of which are optional:
 
 1. `dataset_name`: The name of the dataset.
 2. `dataset_version`: The version of the dataset.
@@ -111,8 +112,6 @@ The key fields defined in this schema are:
 9. `description_uri`: The URI containing a detailed description of the dataset.
 10. `extension_columns`: A list of additional columns present in the dataset beyond the core MEDS schema.
 
-
-`DatasetMetadata` is defined as a JSON schema, which can again be accessed via the `.schema()` method:
 
 ```python
 from meds import DatasetMetadata
@@ -140,13 +139,17 @@ DatasetMetadata.schema()
 
 This schema is intended to capture the complete context and provenance of the dataset. 
 A MEDS-compliant dataset should include this metadata to provide users with a clear understanding 
-of the data's origin and how it was transformed into the MEDS format.
+of the data's origin and how it was transformed into the MEDS format. Note that since this 
+schema is about a single entity, it is the only one defined as a JSON schema.
 
 
 ### The `CodeMetadata` schema
 
 The `CodeMetadata` schema provides additional details on how to describe the types of measurements (=codes) observed in the MEDS dataset. 
-It is designed to include metadata such as human-readable descriptions and ontological relationships for each code. Note that it is not guaranteed that all unique codes present in the dataset will be represented here—see [issue #57](https://github.com/Medical-Event-Data-Standard/meds/issues/57) for further discussion.
+It is designed to include metadata such as human-readable descriptions and ontological relationships for each code. 
+
+> [!Note]
+> It is not guaranteed that all unique codes present in the dataset will be represented here—see [issue #57](https://github.com/Medical-Event-Data-Standard/meds/issues/57) for further discussion.
 
 The core fields in this schema are:
 
@@ -266,7 +269,7 @@ data_subdirectory, dataset_metadata_filepath, code_metadata_filepath, subject_sp
 ('data', 'metadata/dataset.json', 'metadata/codes.parquet', 'metadata/subject_splits.parquet')
 ```
 
-> **Important:** MEDS data must satisfy two key properties:
+> [!Important] MEDS data must satisfy two key properties:
 >
 > 1. **Subject Contiguity:** Data for a single subject must not be split across multiple parquet files.
 > 2. **Sorted Order:** Data for a single subject must be contiguous within its file and sorted by time.
