@@ -15,6 +15,20 @@ The Medical Event Data Standard (MEDS) is a data schema for storing streams of m
 sourced from either Electronic Health Records or claims records. For more information, tutorials, and
 compatible tools see the website: https://medical-event-data-standard.github.io/.
 
+## Table of Contents
+
+- [Philosophy](#philosophy)
+- [The Schemas](#the-schemas)
+  - [The `Data` schema](#the-data-schema)
+  - [The `DatasetMetadata` schema](#the-datasetmetadata-schema)
+  - [The `CodeMetadata` schema](#the-codemetadata-schema)
+  - [The `SubjectSplit` schema](#the-subjectsplit-schema)
+  - [The `Label` schema](#the-label-schema)
+- [Organization on Disk](#organization-on-disk)
+  - [Organization of task labels](#organization-of-task-labels)
+- [Validation](#validation)
+- [Example: MIMIC-IV demo dataset](#example-mimic-iv-demo-dataset)
+
 ## Philosophy
 
 At the heart of MEDS is a simple yet powerful idea: nearly all EHR data can be modeled as a minimal tuple. We believe that the essence of a clinical event can be effectively described using three core components: 
