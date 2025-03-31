@@ -69,8 +69,10 @@ The `Data` schema describes a structure for the underlying medical data. It pres
 Under the hood, this just defines a PyArrow schema, which can be accessed via the `.schema()` method:
 
 ```python
->>> from meds import Data
->>> Data.schema()
+from meds import Data
+Data.schema()
+```
+```console
 subject_id: int64
 time: timestamp[us]
 code: string
@@ -103,11 +105,13 @@ The key fields defined in this schema are:
 10. `extension_columns`: A list of additional columns present in the dataset beyond the core MEDS schema.
 
 
-Under the hood, this just defines a JSON schema, which can again be accessed via the `.schema()` method:
+`DatasetMetadata` is defined as a JSON schema, which can again be accessed via the `.schema()` method:
 
 ```python
->>> from meds import DatasetMetadata
->>> DatasetMetadata.schema()
+from meds import DatasetMetadata
+DatasetMetadata.schema()
+```
+```console
 {
     'type': 'object', 
     'properties': {
@@ -144,8 +148,10 @@ The core fields in this schema are:
 3. `parent_codes`: A list of string identifiers for higher-level or parent codes in an ontological hierarchy. These may link to other codes in the file or external vocabularies (e.g., OMOP CDM).
 
 ```python
->>> from meds import CodeMetadata
->>> CodeMetadata.schema()
+from meds import CodeMetadata
+CodeMetadata.schema()
+```
+```console
 code: string
 description: string
 parent_codes: list<item: string>
@@ -164,8 +170,10 @@ The `SubjectSplit` schema defines how subjects were partitioned into groups for 
 
 
 ```python
->>> from meds import SubjectSplit
->>> SubjectSplit.schema()
+from meds import SubjectSplit
+SubjectSplit.schema()
+```
+```console
 subject_id: int64
 split: string
 ```
@@ -179,13 +187,11 @@ In line with common practice, MEDS defines three sentinel split names for conven
     this split should **not** be used for any purpose except final model validation.
 
 ```python
->>> from meds import train_split, tuning_split, held_out_split
->>> train_split
-'train'
->>> tuning_split 
-'tuning'
->>> held_out_split 
-'held_out'
+from meds import train_split, tuning_split, held_out_split
+train_split, tuning_split, held_out_split
+```
+```console
+('train', 'tuning', 'held_out')
 ```
 
 ### The `Label` schema
@@ -203,8 +209,10 @@ The key fields in the Label schema are:
 Like the other schemas, this is implemented as a PyArrow schema, and extra columns are not allowed.
 
 ```python
->>> from meds import Label
->>> Label.schema()
+from meds import Label
+Label.schema()
+```
+```console
 subject_id: int64
 prediction_time: timestamp[us]
 boolean_value: bool
@@ -239,21 +247,16 @@ A MEDS dataset is organized under a root directory (`$MEDS_ROOT`) into several s
 For ease of use, variables the expected file paths are predefined:
 
 ```python
->>> from meds.schema import (
-...     data_subdirectory,
-...     dataset_metadata_filepath,
-...     code_metadata_filepath,
-...     subject_splits_filepath
-... )
->>> 
->>> data_subdirectory
-'data'
->>> dataset_metadata_filepath
-'metadata/dataset.json'
->>> code_metadata_filepath
-'metadata/codes.parquet'
->>> subject_splits_filepath
-'metadata/subject_splits.parquet'
+from meds.schema import (
+    data_subdirectory,
+    dataset_metadata_filepath,
+    code_metadata_filepath,
+    subject_splits_filepath
+)
+data_subdirectory, dataset_metadata_filepath, code_metadata_filepath, subject_splits_filepath
+```
+```console
+('data', 'metadata/dataset.json', 'metadata/codes.parquet', 'metadata/subject_splits.parquet')
 ```
 
 > **Important:** MEDS data must satisfy two key properties:
