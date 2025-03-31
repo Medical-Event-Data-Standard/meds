@@ -40,15 +40,15 @@ Before we define the various schemas that make up MEDS, we will define some key 
 
 MEDS is composed of five primary schema components:
 
-| **Schema Component**         | **Description**                                                                                                                                                           | **Underlying Implementation** |
+| **Component**         | **Description**                                                                                                                                                           | **Implementation** |
 |------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-------------------------------|
-| **Data Schema**              | Describes the core medical event data, organized as sequences of subject observations (i.e., events).                                                                       | PyArrow schema                |
-| **Dataset Metadata Schema**  | Captures metadata about the source dataset, including its name, version, and details of its conversion to MEDS (e.g., transformation time, ETL details).               | JSON schema                   |
-| **Code Metadata Schema**     | Provides metadata for the codes used to describe the types of measurements observed in the dataset.                                                                       | PyArrow schema                |
-| **Subject Split Schema**     | Stores information on how subjects are partitioned into subpopulations (e.g., training, tuning, held-out) for machine learning tasks.                                    | PyArrow schema                |
-| **Label Schema**             | Defines the structure for labels that may be predicted about a subject at specific times in the subject record.                                                           | PyArrow schema                |
+| `Data`              | Describes the core medical event data, organized as sequences of subject observations (i.e., events).                                                                       | PyArrow schema                |
+| `DatasetMetadata`  | Captures metadata about the source dataset, including its name, version, and details of its conversion to MEDS (e.g., transformation time, ETL details).               | JSON schema                   |
+| `CodeMetadata`     | Provides metadata for the codes used to describe the types of measurements observed in the dataset.                                                                       | PyArrow schema                |
+| `SubjectSplit`     | Stores information on how subjects are partitioned into subpopulations (e.g., training, tuning, held-out) for machine learning tasks.                                    | PyArrow schema                |
+| `Label`             | Defines the structure for labels that may be predicted about a subject at specific times in the subject record.                                                           | PyArrow schema                |
 
-> [!Note]
+> [!Important]
 > Each component is implemented as a dataclass via the [`flexible_schema` package](https://github.com/Medical-Event-Data-Standard/flexible_schema) 
 > to provide convenient validation functionality. Under the hood, these are standard PyArrow schemas (for tabular data) or 
 > JSON schemas (for single-entity metadata).
@@ -57,9 +57,9 @@ MEDS is composed of five primary schema components:
 Below, each schema is introduced in detail. Usage examples and a practical demonstration with the [MIMIC-IV demo dataset](https://physionet.org/content/mimic-iv-demo/2.2/) dataset are provided in a later section.
 
 
-### The data schema
+### The `Data` schema
 
-The _data_ schema describes the underlying medical data and defines four fields that will appear in every MEDS data file:
+The `Data` schema describes the underlying medical data and prescribes four fields that will appear in every MEDS data file:
 
 1. `subject_id`: The ID of the subject this event is about.
 2. `time`: The time of the event. This field is nullable for static events.
@@ -77,12 +77,13 @@ code: string
 numeric_value: float   
 ```
 
-In addition, it can contain any number of custom properties to further enrich observations. This is reflected
-programmatically using the [`flexible_schema`](https://github.com/Medical-Event-Data-Standard/flexible_schema) package as the below schema:
+In addition, a MEDS-compliant dataset can contain any number of custom columns to further enrich observations. 
+Examples of such columns include further ID columns such as `hadm_id` or `icustay_id` to uniquely identify events, 
+additional value types such as `text_value`, or additional metadata such as `ordercategorydescription`.
 
 
 
-### The dataset metadata schema
+### The `DatasetMetadata` schema
 
 The _dataset metadata_ schema documents important information about the underlying source dataset, including its name and version, 
 as well as details about its conversion to MEDS, such as when it was transformed, using what version of what code, etc.
