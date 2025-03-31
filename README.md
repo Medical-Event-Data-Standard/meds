@@ -15,26 +15,19 @@ The Medical Event Data Standard (MEDS) is a data schema for storing streams of m
 sourced from either Electronic Health Records or claims records. For more information, tutorials, and
 compatible tools see the website: https://medical-event-data-standard.github.io/.
 
-## Terminology
+## Philosophy
 
-Before we define the various schemas that make up MEDS, we will define some key terminology that we use in this standard: 
+At the heart of MEDS is a simple yet powerful idea: nearly all EHR data can be modeled as a minimal tuple. We believe that the essence of a clinical event can be effectively described using three core components: 
 
-1. A _subject_ in a MEDS dataset is the primary entity being described by the sequences of care observations
-    in the underlying dataset. In most cases, _subjects_ will, naturally, be individuals, and the sequences
-    of care observations will cover all known observations about those individuals in a source health
-    datasets. However, in some cases, data may be organized so that we cannot describe all the data for an
-    individual reliably in a dataset, but instead can only describe subsequences of an individual's data,
-    such as in datasets that only link an individual's data observations together if they are within the same
-    hospital admission, regardless of how many admissions that individual has in the dataset (such as the
-    [eICU](https://eicu-crd.mit.edu/) dataset). In these cases, a _subject_ in the MEDS dataset may refer to
-    a hospital admission rather than an individual.
-2. A _code_ is the categorical descriptor of what is being observed in any given observation of a subject.
-    In particular, in almost all structured, longitudinal datasets, a measurement can be described as
-    consisting of a tuple containing a `subject_id` (who this measurement is about); a `time` (when this
-    measurement happened); some categorical qualifier describing what was measured, which we will call a
-    `code`; a value of a given type, such as a `numeric_value`, a `text_value`, or a `categorical_value`;
-    and possibly one or more additional measurement properties that describe the measurement in a
-    non-standardized manner.
+1. _subject_: The primary entity for which care observations are recorded. Typically, this is an individual with a complete sequence of observations. In some datasets (e.g., eICU), a subject may refer to a single hospital admission rather than the entire individual record.
+
+2. _time_: The time that the event was observed.
+
+3. _code_: The descriptor of what event is being observed.
+
+This minimalist representation captures the essence of EHR data while providing a consistent foundation for further analysis and enrichment.
+
+
 
 ## The Schemas
 
