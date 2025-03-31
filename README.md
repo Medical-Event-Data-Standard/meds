@@ -38,19 +38,23 @@ Before we define the various schemas that make up MEDS, we will define some key 
 
 ## The Schemas
 
-MEDS consists of five components/schemas:
+MEDS is composed of five primary schema components:
 
-1. A _data_ schema. This schema describes the underlying medical data, organized as sequences of subject
-    observations.
-2. A _dataset metadata_ schema. This schema contains metadata about the source dataset, such as its name and versions, and its conversion to MEDS, such as when it was transformed, using what version of what code, etc.
-3. A _code metadata_ schema. This schema contains metadata describing the codes used to describe the
-    types of measurements observed in the dataset.
-4. A _subject split_ schema. This schema contains metadata about how subjects in the MEDS dataset are
-    assigned to different subpopulations, most commonly used to dictate ML splits.
-5. A _label_ schema. This schema describes labels that may be predicted about a subject
-    at a given time in the subject record.
+| **Schema Component**         | **Description**                                                                                                                                                           | **Underlying Implementation** |
+|------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-------------------------------|
+| **Data Schema**              | Describes the core medical event data, organized as sequences of subject observations (i.e., events).                                                                       | PyArrow schema                |
+| **Dataset Metadata Schema**  | Captures metadata about the source dataset, including its name, version, and details of its conversion to MEDS (e.g., transformation time, ETL details).               | JSON schema                   |
+| **Code Metadata Schema**     | Provides metadata for the codes used to describe the types of measurements observed in the dataset.                                                                       | PyArrow schema                |
+| **Subject Split Schema**     | Stores information on how subjects are partitioned into subpopulations (e.g., training, tuning, held-out) for machine learning tasks.                                    | PyArrow schema                |
+| **Label Schema**             | Defines the structure for labels that may be predicted about a subject at specific times in the subject record.                                                           | PyArrow schema                |
 
-Below, each of these schemas are introduced in detail. Throughout this document, we will use the publicly available [MIMIC-IV demo dataset](https://physionet.org/content/mimic-iv-demo/2.2/) and [its conversion to MEDS](https://github.com/Medical-Event-Data-Standard/MIMIC_IV_MEDS) as a concrete example to see how these schemas might be used in practice.
+> [!Note]
+> Each component is implemented as a dataclass via the [`flexible_schema` package](https://github.com/Medical-Event-Data-Standard/flexible_schema) 
+> to provide convenient validation functionality. Under the hood, these are standard PyArrow schemas (for tabular data) or 
+> JSON schemas (for single-entity metadata).
+
+
+Below, each schema is introduced in detail. Usage examples and a practical demonstration with the [MIMIC-IV demo dataset](https://physionet.org/content/mimic-iv-demo/2.2/) dataset are provided in a later section.
 
 
 ### The data schema
@@ -62,39 +66,6 @@ The _data_ schema describes the underlying medical data and defines four fields 
 3. `code`: The code of the event.
 4. `numeric_value`: The numeric value of the event. This field is nullable for non-numeric events.
 
-In addition, it can contain any number of custom properties to further enrich observations. This is reflected
-programmatically using the [`flexible_schema`](https://github.com/Medical-Event-Data-Standard/flexible_schema) package as the below schema:
-
-```python
-from flexible_schema import PyArrowSchema
-
-
-class Data(PyArrowSchema):
-    """The core data schema for MEDS. Stored in `$MEDS_ROOT/data/$SHARD_NAME.parquet`.
-
-    This is a PyArrow schema that has
-      - 3 mandatory columns (`subject_id`, `time`, `code`)
-      - 1 optional column (`numeric_value`) (optional columns will be added with null values to tables)
-      - Extra columns are allowed.
-
-    Attributes:
-        subject_id: The unique identifier for the subject. This is a 64-bit integer. Should not be null in the
-            data.
-        time: The time of the event. This is a timestamp with microsecond precision. May be null in the data
-            for static measurements.
-        code: The code for the event. This is a string (in an unspecified categorical vocabulary). Should not
-            be null in the data.
-        numeric_value: The numeric value for the event. A 32-bit float. May be null in the data for
-            measurements lacking a numeric value. This column can be omitted wholesale from tables submitted
-            for validation, and will be added to the returned, validated table with null values.
-    """
-
-    subject_id: pa.int64()
-    time: pa.timestamp("us")  # noqa: F821 -- this seems to be a flake error
-    code: pa.string()
-    numeric_value: Optional(pa.float32()) = None
-```
-
 Under the hood, this just defines a PyArrow schema, which can be accessed via the `.schema()` method:
 
 ```python
@@ -105,6 +76,10 @@ time: timestamp[us]
 code: string
 numeric_value: float   
 ```
+
+In addition, it can contain any number of custom properties to further enrich observations. This is reflected
+programmatically using the [`flexible_schema`](https://github.com/Medical-Event-Data-Standard/flexible_schema) package as the below schema:
+
 
 
 ### The dataset metadata schema
