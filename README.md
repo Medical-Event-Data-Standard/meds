@@ -316,10 +316,41 @@ Data.validate(invalid_tbl)
 flexible_schema.base.SchemaValidationError: Missing mandatory columns: {'code'}
 ```
 
+## Example: MIMIC-IV demo dataset
 
-Let's look at the publicly available MIMIC-IV demo dataset for a concrete example of what a MEDS data file may look like.
+Let's look at the publicly available [MIMIC-IV demo](https://physionet.org/content/mimic-iv-demo/2.2/) dataset
+for a concrete example of what a MEDS-compliant dataset may look like. We use [MIMIC_IV_MEDS](https://github.com/Medical-Event-Data-Standard/MIMIC_IV_MEDS) ETL pipeline to automatically download the MIMIC-IV demo dataset and convert it into MEDS format. After running the pipeline, we get a directory structure that looks like this:
+
+```console
+MEDS_cohort
+├── ...
+├── data
+│   ├── held_out
+│   │   └── 0.parquet
+│   ├── train
+│   │   └── 0.parquet
+│   └── tuning
+│       └── 0.parquet
+├── ...
+├── metadata
+│   ├── codes.parquet
+│   ├── dataset.json
+│   └── subject_splits.parquet
+└── ...
+```
+
+We can immediately see that the data is organized as described in the [Organization on Disk](#organization-on-disk) section, with the `data` directory containing the raw underlying event data and the `metadata` directory containing the metadata. The `data` directory contains three subdirectories, `held_out`, `train`, and `tuning`, corresponding to our default split names and each containing a data file in parquet format (since the MIMIC-IV demo dataset is small, we only have one data file per split but in general we would expect multiple shards).
+
+Let's take a look at the contents of one of the data files in the `train` split, which looks something like this (note that we are using the polars package for better readability):
 
 ```python
+from pyarrow import parquet as pq
+import polars as pl
+data_tbl = pq.read_table('data/train/0.parquet')
+pl.from_arrow(data_tbl)
+```
+```console
+shape: (803_992, 25)
 ┌────────────┬─────────────────────┬──────────────────────┬───────────────┬────────────┬───┐
 │ subject_id ┆ time                ┆ code                 ┆ numeric_value ┆ text_value ┆ … │
 │ ---        ┆ ---                 ┆ ---                  ┆ ---           ┆ ---        ┆   │
@@ -333,43 +364,107 @@ Let's look at the publicly available MIMIC-IV demo dataset for a concrete exampl
 └────────────┴─────────────────────┴──────────────────────┴───────────────┴────────────┴───┘
 ```
 
-For each entry, we have the `subject_id` of the person this observation is about, the `time` that the event was recorded, the `code` that describes what this information is about, and some optional fields for the `numeric_value` and/or `text_value` associated with the event.
-
-
-A MEDS-compliant example for MIMIC-IV would be:
+For each entry, we have the `subject_id` of the person this observation is about, the `time` that the event was recorded, the `code` that describes what this information is about, and some optional fields (in this case `numeric_value`s and `text_value`s associated with the event).
 
 ```python
-DatasetMetadata = {
-    "dataset_name": "MIMIC-IV",
-    "dataset_version": "3.1",
-    "etl_name": "MIMIC-IV ETL",
-    "etl_version": "0.0.3",
-    "meds_version": "0.3.3",
-    "created_at": "2025-01-01T00:00:00",
-    "license": "PhysioNet Credentialed Health Data License 1.5.0",
-    "location_uri": "https://physionet.org/content/mimiciv/",
-    "description_uri": "https://mimic.mit.edu/docs/iv/",
-    "extension_columns": [
-        "insurance",
-        "language",
-        "marital_status",
-        "race",
-        "hadm_id",
-        "drg_severity",
-        "drg_mortality",
-        "emar_id",
-        "emar_seq",
-        "priority",
-        "route",
-        "frequency",
-        "doses_per_24_hrs",
-        "poe_id",
-        "icustay_id",
-        "order_id",
-        "link_order_id",
-        "unit",
-        "ordercategorydescription",
-        "statusdescription",
-    ],
+from meds import Data
+Data.validate(data_tbl)
+```
+```console
+pyarrow.Table
+subject_id: int64
+time: timestamp[us]
+code: string
+numeric_value: float
+text_value: large_string
+...
+----
+subject_id: [[12345678,12345678,12345678,12345678,...]]
+time: [[null,2138-01-01 00:00:00,2178-02-12 08:11:00,2178-02-12 11:38:00,...]]
+code: [["GENDER//F","MEDS_BIRTH","LAB//51079//UNK","LAB//51237//UNK",...]]
+numeric_value: [[null,null,null,1.4,...]]
+text_value: [[null,null,"POS",null,...]]
+...
+```
+
+The dataset metadata associated with this dataset is stored in the `metadata/dataset.json` file and looks like this:
+
+```console
+{
+    "dataset_name": "MIMIC-IV", 
+    "dataset_version": "3.1:0.0.4", 
+    "etl_name": "MEDS_transforms", 
+    "etl_version": "0.2.2", 
+    "meds_version": "0.3.3", 
+    "created_at": "2025-03-28T13:47:38.809053"
 }
 ```
+
+The code metadata is stored in the `metadata/codes.parquet` file and looks like this:
+
+```python
+code_tbl = pq.read_table('metadata/codes.parquet')
+pl.from_arrow(code_tbl)
+```
+```console
+┌────────────────────────────┬──────────────────────────┬─────────────────────┬───────────┬─────┐
+│ code                       ┆ description              ┆ parent_codes        ┆ itemid    ┆ ... │
+│ ---                        ┆ ---                      ┆ ---                 ┆ ---       ┆ ... │
+│ str                        ┆ str                      ┆ list[str]           ┆ list[str] ┆ ... │
+╞════════════════════════════╪══════════════════════════╪═════════════════════╪═══════════╪═════╡
+│ DIAGNOSIS//ICD//9//43820   ┆ Late effects of cerebro… ┆ ["ICD9CM/438.20"]   ┆ [null]    ┆ ... │
+│ DIAGNOSIS//ICD//10//M25511 ┆ Pain in right shoulder   ┆ ["ICD10CM/M25.511"] ┆ [null]    ┆ ... │
+│ LAB//51159//UNK            ┆ CD15 cells/100 cells in  ┆ ["LOINC/17117-3"]   ┆ ["51159"] ┆ ... │
+│ LAB//51434//%              ┆ Other cells/100 leukocy… ┆ ["LOINC/76350-8"]   ┆ ["51434"] ┆ ... │
+│ …                          ┆ …                        ┆ …                   ┆ …         ┆ ... │
+└────────────────────────────┴──────────────────────────┴─────────────────────┴───────────┴─────┘
+```
+
+itemid is an example for an extension column that is not part of the core MEDS schema. 
+This is explicitly allowed for the code metadata file and validates accordingly:
+
+```python
+from meds import CodeMetadata
+CodeMetadata.validate(code_tbl)
+```
+```console
+pyarrow.Table
+code: string
+description: string
+parent_codes: list<element: string>
+  child 0, element: string
+itemid: large_list<element: large_string>
+  child 0, element: large_string
+...
+----
+code: [["DIAGNOSIS//ICD//9//43820","DIAGNOSIS//ICD//10//M25511",...]]
+description: [["Late effects of cerebrovascular disease","Pain in right shoulder",...]]
+parent_codes: [[["ICD9CM/438.20"],["ICD10CM/M25.511"],...]]
+itemid: [[[null],[null],...]]
+...
+```
+
+Finally, we can look at the subject splits metadata to find out which subjects were assigned to which splits:
+
+
+```python
+split_tbl = pq.read_table('metadata/subject_splits.parquet')
+pl.from_arrow(split_tbl)
+```
+```console
+┌────────────┬──────────┐
+│ subject_id ┆ split    │
+│ ---        ┆ ---      │
+│ i64        ┆ str      │
+╞════════════╪══════════╡
+│ 12345678   ┆ train    │
+│ 12345679   ┆ train    │
+│ 12345680   ┆ train    │
+│ 12345681   ┆ train    │
+│ 12345682   ┆ train    │
+│ …          ┆ …        │
+└────────────┴──────────┘
+```
+
+Label information is not included in the basic MIMIC-IV ETL, but you can find out more about how to create labels such as ICU mortality in the documentation of the [ACES package](https://eventstreamaces.readthedocs.io/en/latest/notebooks/examples.html).
+
