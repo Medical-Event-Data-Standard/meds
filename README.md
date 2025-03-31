@@ -216,46 +216,60 @@ categorical_value: string
 
 ## Organization on Disk
 
-Given a MEDS dataset stored in the `$MEDS_ROOT` directory data of the various schemas outlined above can be
-found in the following subfolders:
+A MEDS dataset is organized under a root directory (`$MEDS_ROOT`) into several subfolders corresponding to the different schema components. Below is an overview of the directory structure:
 
-- `$MEDS_ROOT/data/`: This directory will contain data in the _data_ schema, organized as a
-    series of possibly nested sharded dataframes stored in `parquet` files. In particular, the file glob
-    `glob("$MEDS_ROOT/data/**/*.parquet)` will capture all sharded data files of the raw MEDS data, all
-    organized into _data schema_ files, sharded by subject and sorted, for each subject, by
-    time.
-- `$MEDS_ROOT/metadata/dataset.json`: This schema contains metadata in the _dataset metadata_ schema about
-    the dataset and its production process.
-- `$MEDS_ROOT/metadata/codes.parquet`: This file contains per-code metadata in the _code metadata_ schema
-    about the MEDS dataset. All codes within the dataset should have an entry in this file.
-    As this dataset describes all codes observed in the full MEDS dataset, it is _not_
-    sharded. Note that some pre-processing operations may, at times, produce sharded code metadata files, but
-    these will always appear in subdirectories of `$MEDS_ROOT/metadata/` rather than at the top level, and
-    should generally not be used for overall metadata operations.
-- `$MEDS_ROOT/metadata/subject_splits.parquet`: This schema contains information in the _subject split
-    schema_ about what splits different subjects are in.
+- **`$MEDS_ROOT/data/*`**  
+  - Contains the event data files following the `Data` schema.  
+  - Data is stored as a series of (possibly nested) sharded DataFrames in `parquet` format.  
+  - The file glob `glob("$MEDS_ROOT/data/**/*.parquet")` will match all these sharded files.  
+  - Each file holds all events for one or more subjects, each of which is sorted by time.
+
+- **`$MEDS_ROOT/metadata/dataset.json`**  
+  - Contains metadata about the dataset and its production process, conforming to the `DatasetMetadata` schema.
+
+- **`$MEDS_ROOT/metadata/codes.parquet`**  
+  - Holds per-code metadata as defined by the `CodeMetadata` schema.  
+  - This file lists metadata for every code observed in the full dataset and is not sharded.  
+  - (Some pre-processing may produce sharded code metadata files, but these reside in subdirectories under `$MEDS_ROOT/metadata/` and are not used for overall metadata operations.)
+
+- **`$MEDS_ROOT/metadata/subject_splits.parquet`**  
+  - Contains information from the `SubjectSplit` schema, indicating how subjects are divided (e.g., training, tuning, held-out).
 
 
-Task label dataframes are stored in the `label_schema`, in a file path that depends on both a
-`$TASK_ROOT` directory where task label dataframes are stored and a `$TASK_NAME` parameter that separates
-different tasks from one another. In particular, the file glob `glob($TASK_ROOT/$TASK_NAME/**/*.parquet)` will
-retrieve a sharded set of dataframes in the `label_schema` where the sharding may or may not match up with
-the sharding used in the raw `$MEDS_ROOT/data/**/*.parquet` files (e.g., the file
-`$TASK_ROOT/$TASK_NAME/$SHARD_NAME.parquet` may cover the labels for the same set of subjects as are
-contained in the raw data file at `$MEDS_ROOT/data/**/*.parquet`). Note that (1) `$TASK_ROOT` may be a subdir
-of `$MEDS_ROOT` (e.g., often `$TASK_ROOT` will be set to `$MEDS_ROOT/tasks`), (2) `$TASK_NAME` may have `/`s
-in it, thereby rendering the task label directory a deep, nested subdir of `$TASK_ROOT`, and (3) in some
-cases, there may be no task labels for a shard of the raw data, if no subject in that shard qualifies for that
-task, in which case it may be true that either `$TASK_ROOT/$TASK_NAME/$SHARD_NAME.parquet` is empty or that it
-does not exist.
+For ease of use, variables the expected file paths are predefined:
 
-> [!Important]
-> MEDS data must further satisfy two important properties: 
+```python
+>>> from meds.schema import (
+...     data_subdirectory,
+...     dataset_metadata_filepath,
+...     code_metadata_filepath,
+...     subject_splits_filepath
+... )
+>>> 
+>>> data_subdirectory
+'data'
+>>> dataset_metadata_filepath
+'metadata/dataset.json'
+>>> code_metadata_filepath
+'metadata/codes.parquet'
+>>> subject_splits_filepath
+'metadata/subject_splits.parquet'
+```
+
+> **Important:** MEDS data must satisfy two key properties:
 >
-> 1. Data about a single subject cannot be split across parquet files. If a subject is in a dataset it must be
->    in one and only one parquet file. 
-> 2. Data about a single subject must be contiguous within a particular parquet file and sorted by time. 
+> 1. **Subject Contiguity:** Data for a single subject must not be split across multiple parquet files.
+> 2. **Sorted Order:** Data for a single subject must be contiguous within its file and sorted by time.
 
+### Organization of task labels
+
+Task label DataFrames are stored separately. Their location depends on two parameters:
+- **`$TASK_ROOT`**: The root directory for task label data (often a subdirectory of `$MEDS_ROOT`, e.g., `$MEDS_ROOT/tasks`).
+- **`$TASK_NAME`**: A parameter to separate different tasks (this value may include `/` characters, creating nested directories).
+
+The file glob `glob($TASK_ROOT/$TASK_NAME/**/*.parquet)` is used to capture all task label files. Note that:
+- The sharding of task label files may differ from that of the raw data files.
+- In some cases, a shard may not contain any task labels if no subject qualifies for the task; such files might be empty or missing.
 
 
 
@@ -293,29 +307,6 @@ subject_id: [[1,2,3]]
 time: [[2021-03-01 00:00:00.000000,2021-04-01 00:00:00.000000,2021-05-01 00:00:00.000000]]
 code: [["A","B","C"]]
 numeric_value: [[null,null,null]]
-
-```
-
-
-
-This can be used to generate a JSON schema for the dataset metadata via the `.to_json_schema()` method:
-
-```python
->>> from meds import DatasetMetadata
->>> DatasetMetadata.schema() # doctest: +NORMALIZE_WHITESPACE
-{'type': 'object',
- 'properties': {'dataset_name': {'type': 'string'},
-                'dataset_version': {'type': 'string'},
-                'etl_name': {'type': 'string'},
-                'etl_version': {'type': 'string'},
-                'meds_version': {'type': 'string'},
-                'created_at': {'type': 'string', 'format': 'date-time'},
-                'license': {'type': 'string'},
-                'location_uri': {'type': 'string'},
-                'description_uri': {'type': 'string'},
-                'extension_columns': {'type': 'array', 'items': {'type': 'string'}}},
- 'required': [],
- 'additionalProperties': True}
 
 ```
 
