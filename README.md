@@ -49,11 +49,11 @@ Building on this philosophy, MEDS defines five primary schema components:
 
 | **Component**         | **Description**                                                                                                                                                           | **Implementation** |
 |------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-------------------------------|
-| `Data`              | Describes the core medical event data, organized as sequences of subject observations (i.e., events).                                                                       | PyArrow schema                |
-| `DatasetMetadata`  | Captures metadata about the source dataset, including its name, version, and details of its conversion to MEDS (e.g., ETL details).               | JSON schema                   |
-| `CodeMetadata`     | Provides metadata for the codes used to describe the types of measurements observed in the dataset.                                                                       | PyArrow schema                |
-| `SubjectSplit`     | Stores information on how subjects are partitioned into subpopulations (e.g., training, tuning, held-out) for machine learning tasks.                                    | PyArrow schema                |
-| `Label`             | Defines the structure for labels that may be predicted about a subject at specific times in the subject record.                                                           | PyArrow schema                |
+| `Data`              | Describes the core medical event data, organized as sequences of subject observations (i.e., events).                                                                       | PyArrow                |
+| `DatasetMetadata`  | Captures metadata about the source dataset, including its name, version, and details of its conversion to MEDS (e.g., ETL details).               | JSON                   |
+| `CodeMetadata`     | Provides metadata for the codes used to describe the types of measurements observed in the dataset.                                                                       | PyArrow                |
+| `SubjectSplit`     | Stores information on how subjects are partitioned into subpopulations (e.g., training, tuning, held-out) for machine learning tasks.                                    | PyArrow                |
+| `Label`             | Defines the structure for labels that may be predicted about a subject at specific times in the subject record.                                                           | PyArrow                |
 
 
 Below, each schema is introduced in detail. Usage examples and a practical demonstration with the [MIMIC-IV demo](https://physionet.org/content/mimic-iv-demo/2.2/) dataset are provided in a later section.
@@ -99,7 +99,7 @@ The `DatasetMetadata` schema structures essential information about the source d
 It includes details such as the dataset’s name, version, and licensing, as well as specifics about the ETL process 
 used for transformation.
 
-The key fields defined in this schema are, all of which are optional:
+There are a couple of recommended fields in this schema, all of which are optional:
 
 1. `dataset_name`: The name of the dataset.
 2. `dataset_version`: The version of the dataset.
@@ -137,7 +137,7 @@ DatasetMetadata.schema()
 }
 ```
 
-This schema is intended to capture the complete context and provenance of the dataset. 
+This schema is intended to capture the context and provenance of the dataset. 
 A MEDS-compliant dataset should include this metadata to provide users with a clear understanding 
 of the data's origin and how it was transformed into the MEDS format. Note that since this 
 schema is about a single entity, it is the only one defined as a JSON schema.
@@ -173,7 +173,7 @@ As with the `Data` schema, the `CodeMetadata` schema can contain any number of c
 
 ### The `SubjectSplit` schema
 
-The `SubjectSplit` schema defines how subjects were partitioned into groups for machine learning tasks. This schema consists of two mandatory fields:
+The `SubjectSplit` schema defines how subjects were partitioned into groups for machine learning tasks. This schema consists of just two mandatory fields:
 
 1. `subject_id`: The ID of the subject. This serves as the join key with the core MEDS data.
 2. `split`: The name of the assigned split.
@@ -188,13 +188,15 @@ subject_id: int64
 split: string
 ```
 
-In line with common practice, MEDS defines three sentinel split names for convenience and shared processing:
+In line with common practice, MEDS also defines three sentinel split names for convenience and shared processing:
 
 1. `train`: For model training.
 2. `tuning`: For hyperparameter tuning (often referred to alternatively as the "validation" or "dev" set). 
     In many cases, a tuning split may not be necessary and can be merged with the training set.
 3. `held_out`: For final model evaluation (also commonly called the "test" set). When performing benchmarking, 
     this split should **not** be used for any purpose except final model validation.
+
+These sentinel names are available as exported variables:
 
 ```python
 from meds import train_split, tuning_split, held_out_split
@@ -216,7 +218,7 @@ The key fields in the Label schema are:
 5. `float_value`: The float value of the label. This field is nullable for non-float labels.
 6. `categorical_value`: The categorical value of the label. This field is nullable for non-categorical labels.
 
-Like the other schemas, this is implemented as a PyArrow schema, and extra columns are not allowed.
+Like the other schemas, this is implemented as a PyArrow schema but extra columns are *not* allowed.
 
 ```python
 from meds import Label
@@ -254,10 +256,10 @@ A MEDS dataset is organized under a root directory (`$MEDS_ROOT`) into several s
   - Contains information from the `SubjectSplit` schema, indicating how subjects are divided (e.g., training, tuning, held-out).
 
 
-For ease of use, variables the expected file paths are predefined:
+For ease of use, variables with the expected file paths are predefined:
 
 ```python
-from meds.schema import (
+from meds import (
     data_subdirectory,
     dataset_metadata_filepath,
     code_metadata_filepath,
@@ -269,8 +271,8 @@ data_subdirectory, dataset_metadata_filepath, code_metadata_filepath, subject_sp
 ('data', 'metadata/dataset.json', 'metadata/codes.parquet', 'metadata/subject_splits.parquet')
 ```
 
-> [!Important] MEDS data must satisfy two key properties:
->
+> [!Important] 
+> MEDS data must satisfy two key properties:
 > 1. **Subject Contiguity:** Data for a single subject must not be split across multiple parquet files.
 > 2. **Sorted Order:** Data for a single subject must be contiguous within its file and sorted by time.
 
@@ -288,7 +290,7 @@ The file glob `glob($TASK_ROOT/$TASK_NAME/**/*.parquet)` is used to capture all 
 
 ## Validation
 
-The schema objects described above can be used to validate a dataset against the MEDS schema via the .validate() method. When you call this method, the input data is checked to ensure it contains all required columns with the correct types. If optional columns (such as numeric_value in the Data schema) are missing, they are automatically added with null values. This guarantees that the validated table conforms to the expected schema.
+The schema objects described above can be used to validate a dataset against the MEDS schema via the `.validate()` method. When you call this method, the input data is checked to ensure it contains all required columns with the correct types. If optional columns (such as `numeric_value` in the `Data` schema) are missing, they are automatically added with `null` values. This guarantees that the validated table conforms to the expected schema.
 
 For example, consider the following code snippet that uses the `Data` schema to validate a made-up data file:
 
@@ -356,7 +358,7 @@ MEDS_cohort
 └── ...
 ```
 
-We can immediately see that the data is organized as described in the [Organization on Disk](#organization-on-disk) section, with the `data` directory containing the raw underlying event data and the `metadata` directory containing the metadata. The `data` directory contains three subdirectories, `held_out`, `train`, and `tuning`, corresponding to our default split names and each containing a data file in parquet format (since the MIMIC-IV demo dataset is small, we only have one data file per split but in general we would expect multiple shards).
+We can immediately see that the data is organized as described in the [Organization on Disk](#organization-on-disk) section, with the `data` directory containing the raw underlying event data and the `metadata` directory containing the metadata. The `data` directory contains three subdirectories, `train`, `tuning`, and `held_out`, corresponding to our default split names and each containing a data file in parquet format (since the MIMIC-IV demo dataset is small, we only have one data file per split but in general we would expect multiple shards).
 
 Let's take a look at the contents of one of the data files in the `train` split, which looks something like this (note that we are using the polars package for better readability):
 
@@ -437,7 +439,7 @@ pl.from_arrow(code_tbl)
 └────────────────────────────┴──────────────────────────┴─────────────────────┴───────────┴─────┘
 ```
 
-itemid is an example for an extension column that is not part of the core MEDS schema. 
+`itemid` is an example for an extension column that is not part of the core MEDS schema. 
 This is explicitly allowed for the code metadata file and validates accordingly:
 
 ```python
@@ -483,5 +485,5 @@ pl.from_arrow(split_tbl)
 └────────────┴──────────┘
 ```
 
-Label information is not included in the basic MIMIC-IV ETL, but you can find out more about how to create labels such as ICU mortality in the documentation of the [ACES package](https://eventstreamaces.readthedocs.io/en/latest/notebooks/examples.html).
+Note that label information is not included in the basic MIMIC-IV ETL, but you can find out more about how to create labels such as ICU mortality in the documentation of the [ACES package](https://eventstreamaces.readthedocs.io/en/latest/notebooks/examples.html).
 
