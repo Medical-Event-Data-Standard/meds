@@ -1,3 +1,7 @@
+<p align="center">
+  <img width="200" height="200" src="https://medical-event-data-standard.github.io/img/logo.svg" alt="MEDS Logo">
+</p>
+
 # Medical Event Data Standard
 
 [![PyPI - Version](https://img.shields.io/pypi/v/meds)](https://pypi.org/project/meds/)
