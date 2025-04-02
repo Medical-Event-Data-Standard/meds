@@ -487,3 +487,10 @@ pl.from_arrow(split_tbl)
 
 Note that label information is not included in the basic MIMIC-IV ETL, but you can find out more about how to create labels such as ICU mortality in the documentation of the [ACES package](https://eventstreamaces.readthedocs.io/en/latest/notebooks/examples.html).
 
+## Springboard
+Our website contains tutorials for getting started with MEDS and information about the current tools:
+- [Converting to MEDS](https://medical-event-data-standard.github.io/docs/tutorial-basics/converting_to_MEDS)
+- [Modeling over MEDS data](https://medical-event-data-standard.github.io/docs/tutorial-basics/modeling_over_MEDS_data)
+- [Public Research Resources](https://medical-event-data-standard.github.io/docs/MEDS_datasets_and_models)
+
+
