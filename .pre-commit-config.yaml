@@ -1,7 +1,7 @@
 default_language_version:
-  python: python3
+  python: python3.12
 
-exclude: "sample_dataset/dataset.pkl|docs/index.md"
+exclude: "docs/index.md"
 
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
@@ -20,32 +20,16 @@ repos:
       - id: check-added-large-files
         args: [--maxkb, "800"]
 
-  # python code formatting
-  - repo: https://github.com/psf/black
-    rev: 23.7.0
+  # python code formatting, linting, and import sorting using ruff
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.11.5
     hooks:
-      - id: black
-        args: [--line-length, "110"]
-
-  # python import sorting
-  - repo: https://github.com/PyCQA/isort
-    rev: 5.12.0
-    hooks:
-      - id: isort
-        args: ["--profile", "black", "--filter-files", "-o", "wandb"]
-
-  - repo: https://github.com/PyCQA/autoflake
-    rev: v2.2.0
-    hooks:
-      - id: autoflake
-        args: [--in-place, --remove-all-unused-imports]
-
-  # python upgrading syntax to newer version
-  - repo: https://github.com/asottile/pyupgrade
-    rev: v3.10.1
-    hooks:
-      - id: pyupgrade
-        args: ["--py310-plus"]
+      # Run the formatter
+      - id: ruff-format
+        args: ["--line-length", "110"]
+      # Run the linter
+      - id: ruff
+        args: ["--fix", "--exit-non-zero-on-fix"]
 
   # python docstring formatting
   - repo: https://github.com/myint/docformatter
@@ -54,26 +38,9 @@ repos:
       - id: docformatter
         args: [--in-place, --wrap-summaries=110, --wrap-descriptions=110]
 
-  # python check (PEP8), programming errors and code complexity
-  - repo: https://github.com/PyCQA/flake8
-    rev: 6.1.0
-    hooks:
-      - id: flake8
-        args:
-          [
-            "--max-complexity=10",
-            "--extend-ignore",
-            "E402,E701,E251,E226,E302,W504,E704,E402,E401,C901,E203",
-            "--max-line-length=110",
-            "--exclude",
-            "logs/*,data/*",
-            "--per-file-ignores",
-            "__init__.py:F401",
-          ]
-
   # yaml formatting
   - repo: https://github.com/pre-commit/mirrors-prettier
-    rev: v3.0.3
+    rev: v4.0.0-alpha.8
     hooks:
       - id: prettier
         types: [yaml]
@@ -81,18 +48,19 @@ repos:
 
   # shell scripts linter
   - repo: https://github.com/shellcheck-py/shellcheck-py
-    rev: v0.9.0.5
+    rev: v0.10.0.1
     hooks:
       - id: shellcheck
 
   # md formatting
   - repo: https://github.com/executablebooks/mdformat
-    rev: 0.7.17
+    rev: 0.7.22
     hooks:
       - id: mdformat
         args: ["--number"]
         additional_dependencies:
           - mdformat-gfm
+          - mdformat-gfm-alerts
           - mdformat-tables
           - mdformat_frontmatter
           - mdformat-black
@@ -100,34 +68,27 @@ repos:
           - mdformat-shfmt
           - mdformat-mkdocs
           - mdformat-toc
-          - mdformat-admon
 
   # word spelling linter
   - repo: https://github.com/codespell-project/codespell
-    rev: v2.2.5
+    rev: v2.4.1
     hooks:
       - id: codespell
         args:
-          - --skip=logs/**,data/**,*.ipynb,*.bib,env.yml,env_cpu.yml,*.svg,poetry.lock
-          - --ignore-words-list=ehr
+          - --skip=*.ipynb,*.bib,*.svg,pyproject.toml
+          - --ignore-words-list=ehr,crate
 
   # jupyter notebook cell output clearing
   - repo: https://github.com/kynan/nbstripout
-    rev: 0.6.1
+    rev: 0.8.1
     hooks:
       - id: nbstripout
 
-  # jupyter notebook linting
+  # jupyter notebook linting with ruff
   - repo: https://github.com/nbQA-dev/nbQA
-    rev: 1.7.0
+    rev: 1.9.1
     hooks:
-      - id: nbqa-black
+      - id: nbqa-ruff
+        args: ["--fix"]
+      - id: nbqa-ruff-format
         args: ["--line-length=110"]
-      - id: nbqa-isort
-        args: ["--profile=black"]
-      - id: nbqa-flake8
-        args:
-          [
-            "--extend-ignore=E203,E402,E501,F401,F841",
-            "--exclude=logs/*,data/*",
-          ]

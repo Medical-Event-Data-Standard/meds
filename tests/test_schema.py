@@ -72,22 +72,38 @@ def test_label_schema():
     """Test that mock label data follows the label schema."""
     # Each element in the list is a row in the table
     label_data = [
-        {"subject_id": 123, "prediction_time": datetime.datetime(2020, 1, 1, 12, 0, 0), "boolean_value": True}
+        {
+            "subject_id": 123,
+            "prediction_time": datetime.datetime(2020, 1, 1, 12, 0, 0),
+            "boolean_value": True,
+        }
     ]
     Label.validate(pa.Table.from_pylist(label_data))
 
     label_data = [
-        {"subject_id": 123, "prediction_time": datetime.datetime(2020, 1, 1, 12, 0, 0), "integer_value": 4}
+        {
+            "subject_id": 123,
+            "prediction_time": datetime.datetime(2020, 1, 1, 12, 0, 0),
+            "integer_value": 4,
+        }
     ]
     Label.validate(pa.Table.from_pylist(label_data))
 
     label_data = [
-        {"subject_id": 123, "prediction_time": datetime.datetime(2020, 1, 1, 12, 0, 0), "float_value": 0.4}
+        {
+            "subject_id": 123,
+            "prediction_time": datetime.datetime(2020, 1, 1, 12, 0, 0),
+            "float_value": 0.4,
+        }
     ]
     Label.validate(pa.Table.from_pylist(label_data))
 
     label_data = [
-        {"subject_id": 123, "prediction_time": datetime.datetime(2020, 1, 1, 12, 0, 0), "float_value": 0.4}
+        {
+            "subject_id": 123,
+            "prediction_time": datetime.datetime(2020, 1, 1, 12, 0, 0),
+            "float_value": 0.4,
+        }
     ]
     Label.validate(pa.Table.from_pylist(label_data))
 

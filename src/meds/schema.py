@@ -3,6 +3,7 @@
 Please see the README for more information, including expected file organization on disk, more details on what
 each schema should capture, etc.
 """
+
 import datetime
 import os
 from typing import ClassVar

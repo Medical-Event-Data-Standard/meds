@@ -32,7 +32,7 @@ Homepage = "https://medical-event-data-standard.github.io/"
 Issues = "https://github.com/Medical-Event-Data-Standard/meds/issues"
 
 [project.optional-dependencies]
-dev = ["pre-commit<4"]
+dev = ["pre-commit<4", "ruff"]
 tests = ["pytest", "pytest-cov[toml]"]
 
 [tool.pytest.ini_options]
