@@ -59,7 +59,7 @@ Building on this philosophy, MEDS defines five primary schema components:
 
 Below, each schema is introduced in detail. Usage examples and a practical demonstration with the [MIMIC-IV demo](https://physionet.org/content/mimic-iv-demo/2.2/) dataset are provided in a later section.
 
-> \[!Important\]
+> [!IMPORTANT]
 > Each component is implemented as a dataclass via the [`flexible_schema`](https://github.com/Medical-Event-Data-Standard/flexible_schema) package
 > to provide convenient validation functionality. Under the hood, these are standard PyArrow schemas (for tabular data) or
 > JSON schemas (for single-entity metadata).
@@ -147,7 +147,7 @@ schema is about a single entity, it is the only one defined as a JSON schema.
 The `CodeMetadata` schema provides additional details on how to describe the types of measurements (=codes) observed in the MEDS dataset.
 It is designed to include metadata such as human-readable descriptions and ontological relationships for each code.
 
-> \[!Note\]
+> [!NOTE]
 > It is not guaranteed that all unique codes present in the dataset will be represented here—see [issue #57](https://github.com/Medical-Event-Data-Standard/meds/issues/57) for further discussion.
 
 The core fields in this schema are:
@@ -281,7 +281,7 @@ data_subdirectory, dataset_metadata_filepath, code_metadata_filepath, subject_sp
 ('data', 'metadata/dataset.json', 'metadata/codes.parquet', 'metadata/subject_splits.parquet')
 ```
 
-> \[!Important\]
+> [!IMPORTANT]
 > MEDS data must satisfy two key properties:
 >
 > 1. **Subject Contiguity:** Data for a single subject must not be split across multiple parquet files.
