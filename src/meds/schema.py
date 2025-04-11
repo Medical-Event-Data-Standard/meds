@@ -52,7 +52,7 @@ class Data(PyArrowSchema):
     """
 
     subject_id: pa.int64()
-    time: pa.timestamp("us")  # noqa: F821 -- this seems to be a flake error
+    time: pa.timestamp("us")
     code: pa.string()
     numeric_value: Optional(pa.float32()) = None
 
@@ -90,7 +90,7 @@ class Label(PyArrowSchema):
     allow_extra_columns: ClassVar[bool] = False
 
     subject_id: pa.int64()
-    prediction_time: pa.timestamp("us")  # noqa: F821 -- this seems to be a flake error
+    prediction_time: pa.timestamp("us")
     boolean_value: Optional(pa.bool_()) = None
     integer_value: Optional(pa.int64()) = None
     float_value: Optional(pa.float32()) = None
