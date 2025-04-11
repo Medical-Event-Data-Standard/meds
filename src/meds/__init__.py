@@ -1,4 +1,4 @@
-from meds._version import __version__  # noqa
+from meds._version import __version__
 
 from .schema import (
     CodeMetadata,
