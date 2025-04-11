@@ -58,6 +58,7 @@ repos:
       - id: mdformat
         args: ["--number"]
         additional_dependencies:
+          - mdformat-ruff
           - mdformat-gfm
           - mdformat-gfm-alerts
           - mdformat-tables
