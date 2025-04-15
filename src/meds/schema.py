@@ -58,7 +58,7 @@ class Data(PyArrowSchema):
     time: Required(pa.timestamp("us"), nullable=Nullability.SOME)
     code: Required(pa.string(), nullable=False)
     numeric_value: Optional(pa.float32())
-    text_value: Optional(pa.string())
+    text_value: Optional(pa.large_string())
 
 
 ############################################################
