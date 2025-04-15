@@ -193,10 +193,9 @@ code_metadata_filepath = os.path.join("metadata", "codes.parquet")
 class CodeMetadata(PyArrowSchema):
     """The schema for the code metadata file. Stored in `$MEDS_ROOT/metadata/codes.parquet`.
 
-    This file contains additional details about the codes in the MEDS dataset. It is not guaranteed that all
-    unique codes in the dataset will be present in this file. See
-    https://github.com/Medical-Event-Data-Standard/meds/issues/57 if you would like to comment on this design
-    or advocate for mandating that all codes be present in this file.
+    This file contains additional details about the codes in the MEDS dataset. It is guaranteed that all
+    unique codes in the dataset will be present in this file, for any valid MEDS dataset (though this property
+    may or may not hold after pre-processing steps happen).
 
     This is a PyArrow schema that has
         - 3 mandatory columns (`code`, `description`, `parent_codes`)
