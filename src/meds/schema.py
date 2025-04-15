@@ -36,7 +36,7 @@ class Data(PyArrowSchema):
 
     This is a PyArrow schema that has
       - 3 mandatory columns (`subject_id`, `time`, `code`)
-      - 1 optional column (`numeric_value`) (optional columns will be added with null values to tables)
+      - 2 optional column (`numeric_value`, `text_value`)
       - Extra columns are allowed.
 
     Attributes:
@@ -49,12 +49,16 @@ class Data(PyArrowSchema):
         numeric_value: The numeric value for the event. A 32-bit float. May be null in the data for
             measurements lacking a numeric value. This column can be omitted wholesale from tables submitted
             for validation, and will be added to the returned, validated table with null values.
+        text_value: The text value for the event. A string. This is often used for both (a) measurements that
+            have free-text descriptions, such as unstructured laboratory test results, and (b) free-text
+            clinical notes.
     """
 
     subject_id: pa.int64()
     time: pa.timestamp("us")
     code: pa.string()
-    numeric_value: Optional(pa.float32()) = None
+    numeric_value: Optional(pa.float32())
+    text_value: Optional(pa.string())
 
 
 ############################################################

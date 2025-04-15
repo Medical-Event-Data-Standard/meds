@@ -72,6 +72,8 @@ The `Data` schema describes a structure for the underlying medical data. It pres
 2. `time`: The time of the event. This field is nullable for static events.
 3. `code`: The code of the event.
 4. `numeric_value`: The numeric value of the event. This field is nullable for non-numeric events.
+5. `text_value`: The text value of the event. This field is nullable for non-text events and is overall
+    optional.
 
 Under the hood, this just defines a PyArrow schema, which can be accessed via the `.schema()` method:
 
