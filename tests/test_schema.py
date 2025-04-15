@@ -38,7 +38,7 @@ def test_data_schema():
         }
     ]
 
-    Data.validate(pa.Table.from_pylist(raw_data))
+    _ = Data.align(pa.Table.from_pylist(raw_data))
 
 
 def test_code_metadata_schema():
@@ -52,7 +52,7 @@ def test_code_metadata_schema():
         }
     ]
 
-    CodeMetadata.validate(pa.Table.from_pylist(code_metadata))
+    _ = CodeMetadata.align(pa.Table.from_pylist(code_metadata))
 
 
 def test_subject_splits_schema():
@@ -65,56 +65,25 @@ def test_subject_splits_schema():
         {"subject_id": 123, "split": "special"},
     ]
 
-    SubjectSplit.validate(pa.Table.from_pylist(subject_splits_data))
+    _ = SubjectSplit.align(pa.Table.from_pylist(subject_splits_data))
 
 
 def test_label_schema():
     """Test that mock label data follows the label schema."""
     # Each element in the list is a row in the table
-    label_data = [
-        {
-            "subject_id": 123,
-            "prediction_time": datetime.datetime(2020, 1, 1, 12, 0, 0),
-            "boolean_value": True,
-        }
-    ]
-    Label.validate(pa.Table.from_pylist(label_data))
 
-    label_data = [
-        {
-            "subject_id": 123,
-            "prediction_time": datetime.datetime(2020, 1, 1, 12, 0, 0),
-            "integer_value": 4,
-        }
-    ]
-    Label.validate(pa.Table.from_pylist(label_data))
+    base_label = {
+        "subject_id": 123,
+        "prediction_time": datetime.datetime(2020, 1, 1, 12, 0, 0),
+    }
 
-    label_data = [
-        {
-            "subject_id": 123,
-            "prediction_time": datetime.datetime(2020, 1, 1, 12, 0, 0),
-            "float_value": 0.4,
-        }
-    ]
-    Label.validate(pa.Table.from_pylist(label_data))
-
-    label_data = [
-        {
-            "subject_id": 123,
-            "prediction_time": datetime.datetime(2020, 1, 1, 12, 0, 0),
-            "float_value": 0.4,
-        }
-    ]
-    Label.validate(pa.Table.from_pylist(label_data))
-
-    label_data = [
-        {
-            "subject_id": 123,
-            "prediction_time": datetime.datetime(2020, 1, 1, 12, 0, 0),
-            "categorical_value": "text",
-        }
-    ]
-    Label.validate(pa.Table.from_pylist(label_data))
+    for label_col in [
+        {"boolean_value": True},
+        {"integer_value": 4},
+        {"float_value": 0.4},
+        {"categorical_value": "text"},
+    ]:
+        _ = Label.align(pa.Table.from_pylist([base_label | label_col]))
 
 
 def test_dataset_metadata_schema():
@@ -127,6 +96,7 @@ def test_dataset_metadata_schema():
     }
 
     try:
+        DatasetMetadata.validate(metadata)
         jsonschema.validate(instance=metadata, schema=DatasetMetadata.schema())
 
         dataset_metadata = DatasetMetadata(**metadata)
