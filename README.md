@@ -284,9 +284,18 @@ observed in the MEDS dataset. It is designed to include metadata such as human-r
 ontological relationships for each code. As with the `Data` schema, the `CodeMetadata` schema can contain any
 number of custom columns to further describe the codes contained in the dataset.
 
+> [!IMPORTANT]
+> The `code` column in the `CodeMetadata` schema is required to contain all unique codes found in the
+> corresponding raw MEDS dataset (though this property may or may not hold after pre-processing steps happen).
+> This ensures that downstream users can reliably scan the "vocabulary" of the dataset without processing all
+> shards. Helpers to ensure this can be added easily to any dataset that is otherwise valid are being added
+> currently; see #86 to follow developments here.
+
 > [!NOTE]
-> It is not guaranteed that all unique codes present in the dataset will be represented here—see [issue #57](https://github.com/Medical-Event-Data-Standard/meds/issues/57) for further discussion.
-> It is also not guaranteed that the rows in this table will all be unique w.r.t. the `code` column.
+> It is also not guaranteed that the rows in this table will all be unique w.r.t. the `code` column. Certain
+> datasets may have "code modifiers" that exist as extension columns in the `Data` schema but are essential to
+> capturing the unique meaning of codes -- these columns may expand the number of rows in the code metadata to
+> include all combinations of the code and its modifiers.
 
 | **Column Name** | **Conceptual Description**                                                                                                                                                               | **Type**                | **Required** | **Nullable** |
 | --------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------- | ------------ | ------------ |
@@ -307,6 +316,11 @@ parent_codes: list<item: string>
 ```
 
 Validation and alignment work much as they do for the `Data` schema.
+
+> [!NOTE]
+> The fact that all data codes should appear in this file is not captured in the `validate` or `align` methods
+> on the `CodeMetadata` schema. This is because that validation requires knowledge of not just the code
+> metadata table, but also the raw data itself.
 
 ### The `SubjectSplit` schema
 
