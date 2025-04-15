@@ -167,7 +167,23 @@ class DatasetMetadata(JSONSchema):
         license: The license for the dataset.
         location_uri: The URI for the dataset location.
         description_uri: The URI for the dataset description.
-        extension_columns: A list of columns in the data beyond those required in the core MEDS data schema.
+        raw_source_id_columns: A list of columns in the data that are not part of the core MEDS data schema
+            and contain identifiers or join keys to the raw source data. These will typically have no use
+            outside of join operations in downstream modeling steps.
+        code_modifier_columns: A list of columns in the data that are not part of the core MEDS data schema
+            and contain "code modifiers" -- meaning columns that should be seen to "modify" the core code. For
+            example, a code modifier might be a column that indicates the "unit" of a measurement, or a column
+            that indicates the priority assigned to a laboratory test order. These columns are typically
+            useful during subsequent pre-processing steps to enrich code group-by operations for aggregating
+            over codes. These columns should all appear in the data schema and be strings.
+        additional_value_modality_columns: A list of columns in the data that are not part of the core MEDS
+            data schema but contain additional "value modalities" beyond numeric or text. These may include
+            paths to imaging or waveform data, for example. Columns with consistent names that are used in
+            this way will eventually be considered for promotion into the core MEDS schema.
+        site_id_columns: A list of columns in the data that are not part of the core MEDS data schema and
+            contain identifiers for the site of care.
+        other_extension_columns: A list of columns in the data that are not part of the core MEDS data schema
+            and contain other columns beyond those described above.
     """
 
     dataset_name: Optional(str)
@@ -179,7 +195,11 @@ class DatasetMetadata(JSONSchema):
     license: Optional(str)
     location_uri: Optional(str)
     description_uri: Optional(str)
-    extension_columns: Optional(list[str])
+    raw_source_id_columns: Optional(list[str])
+    code_modifier_columns: Optional(list[str])
+    additional_value_modality_columns: Optional(list[str])
+    site_id_columns: Optional(list[str])
+    other_extension_columns: Optional(list[str])
 
 
 ############################################################

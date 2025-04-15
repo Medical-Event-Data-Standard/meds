@@ -237,7 +237,23 @@ Fields:
 7. `license`: The license under which the dataset is released.
 8. `location_uri`: The URI where the dataset is hosted.
 9. `description_uri`: The URI containing a detailed description of the dataset.
-10. `extension_columns`: A list of additional columns present in the dataset beyond the core MEDS schema.
+10. `raw_source_id_columns`: A list of columns in the data that are not part of the core MEDS data schema
+    and contain identifiers or join keys to the raw source data. These will typically have no use outside of
+    join operations in downstream modeling steps.
+11. `code_modifier_columns`: A list of columns in the data that are not part of the core MEDS data schema and
+    contain "code modifiers" -- meaning columns that should be seen to "modify" the core code. For example, a
+    code modifier might be a column that indicates the "unit" of a measurement, or a column that indicates the
+    priority assigned to a laboratory test order. These columns are typically useful during subsequent
+    pre-processing steps to enrich code group-by operations for aggregating over codes. These columns should
+    all appear in the data schema and be strings.
+12. `additional_value_modality_columns`: A list of columns in the data that are not part of the core MEDS data
+    schema but contain additional "value modalities" beyond numeric or text. These may include paths to
+    imaging or waveform data, for example. Columns with consistent names that are used in this way will
+    eventually be considered for promotion into the core MEDS schema.
+13. `site_id_columns`: A list of columns in the data that are not part of the core MEDS data schema and
+    contain identifiers for the site of care.
+14. `other_extension_columns`: A list of columns in the data that are not part of the core MEDS data schema and
+    contain other columns beyond those described above.
 
 #### Examples
 
@@ -257,7 +273,11 @@ JSON blobs. You can't align JSON blobs, as that functionality only exists for `P
                 'license': {'type': 'string'},
                 'location_uri': {'type': 'string'},
                 'description_uri': {'type': 'string'},
-                'extension_columns': {'type': 'array', 'items': {'type': 'string'}}},
+                'raw_source_id_columns': {'type': 'array', 'items': {'type': 'string'}},
+                'code_modifier_columns': {'type': 'array', 'items': {'type': 'string'}},
+                'additional_value_modality_columns': {'type': 'array', 'items': {'type': 'string'}},
+                'site_id_columns': {'type': 'array', 'items': {'type': 'string'}},
+                'other_extension_columns': {'type': 'array', 'items': {'type': 'string'}}},
  'required': [],
  'additionalProperties': True}
 >>> DatasetMetadata.dataset_name_name
