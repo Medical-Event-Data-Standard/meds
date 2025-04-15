@@ -9,7 +9,7 @@ import os
 from typing import ClassVar
 
 import pyarrow as pa
-from flexible_schema import JSONSchema, Optional, PyArrowSchema
+from flexible_schema import JSONSchema, Nullability, Optional, PyArrowSchema, Required
 
 ############################################################
 
@@ -51,10 +51,10 @@ class Data(PyArrowSchema):
             for validation, and will be added to the returned, validated table with null values.
     """
 
-    subject_id: pa.int64()
-    time: pa.timestamp("us")
-    code: pa.string()
-    numeric_value: Optional(pa.float32()) = None
+    subject_id: Required(pa.int64(), nullable=False)
+    time: Required(pa.timestamp("us"), nullable=Nullability.SOME)
+    code: Required(pa.string(), nullable=False)
+    numeric_value: Optional(pa.float32())
 
 
 ############################################################
@@ -89,12 +89,12 @@ class Label(PyArrowSchema):
 
     allow_extra_columns: ClassVar[bool] = False
 
-    subject_id: pa.int64()
-    prediction_time: pa.timestamp("us")
-    boolean_value: Optional(pa.bool_()) = None
-    integer_value: Optional(pa.int64()) = None
-    float_value: Optional(pa.float32()) = None
-    categorical_value: Optional(pa.string()) = None
+    subject_id: Required(pa.int64(), nullable=False)
+    prediction_time: Required(pa.timestamp("us"), nullable=False)
+    boolean_value: Optional(pa.bool_(), nullable=False)
+    integer_value: Optional(pa.int64(), nullable=False)
+    float_value: Optional(pa.float32(), nullable=False)
+    categorical_value: Optional(pa.string(), nullable=False)
 
 
 ############################################################
@@ -136,8 +136,8 @@ class SubjectSplit(PyArrowSchema):
 
     allow_extra_columns: ClassVar[bool] = False
 
-    subject_id: pa.int64()
-    split: pa.string()
+    subject_id: Required(pa.int64(), nullable=False)
+    split: Required(pa.string(), nullable=False)
 
 
 ############################################################
@@ -166,16 +166,16 @@ class DatasetMetadata(JSONSchema):
         extension_columns: A list of columns in the data beyond those required in the core MEDS data schema.
     """
 
-    dataset_name: Optional(str) = None
-    dataset_version: Optional(str) = None
-    etl_name: Optional(str) = None
-    etl_version: Optional(str) = None
-    meds_version: Optional(str) = None
-    created_at: Optional(datetime.datetime) = None
-    license: Optional(str) = None
-    location_uri: Optional(str) = None
-    description_uri: Optional(str) = None
-    extension_columns: Optional(list[str]) = None
+    dataset_name: Optional(str)
+    dataset_version: Optional(str)
+    etl_name: Optional(str)
+    etl_version: Optional(str)
+    meds_version: Optional(str)
+    created_at: Optional(datetime.datetime)
+    license: Optional(str)
+    location_uri: Optional(str)
+    description_uri: Optional(str)
+    extension_columns: Optional(list[str])
 
 
 ############################################################
@@ -209,6 +209,6 @@ class CodeMetadata(PyArrowSchema):
             typically, this is used to link to vocabularies in the OMOP CDM.
     """
 
-    code: pa.string()
-    description: pa.string()
-    parent_codes: pa.list_(pa.string())
+    code: Required(pa.string(), nullable=False)
+    description: Optional(pa.string())
+    parent_codes: Optional(pa.list_(pa.string()))

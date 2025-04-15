@@ -24,7 +24,7 @@ dependencies = [
     "pyarrow >= 8",
     "jsonschema >= 4.0.0",
     "typing_extensions >= 4.0",
-    "flexible_schema == 0.0.3",
+    "flexible_schema ~= 0.1.0",
 ]
 
 [project.urls]
@@ -38,7 +38,9 @@ tests = ["pytest", "pytest-cov[toml]"]
 [tool.pytest.ini_options]
 addopts = [
   "--color=yes",
+  "--doctest-glob=README.md",
 ]
+doctest_optionflags = ["NORMALIZE_WHITESPACE", "ELLIPSIS"]
 
 [tool.setuptools_scm]
 version_file = "src/meds/_version.py"
