@@ -87,10 +87,11 @@ The `Data` schema describes a structure for the underlying medical data. It cont
 | `time`          | The time of the measurement.                                                                                                        | `pa.timestamp('us')` | Yes          | Yes, for static measurements                           |
 | `code`          | The primary categorical descriptor of what is being measured. E.g., the laboratory test being measured or diagnosis being recorded. | `pa.string()`        | Yes          | No                                                     |
 | `numeric_value` | Any numeric value associated with this measurement (e.g., the laboratory test result).                                              | `pa.float32()`       | No           | Yes, for measurements that do no have a numeric value. |
+| `text_value`    | Any text value associated with this measurement (e.g., the result of a text-based test, a clinical note).                           | `pa.large_string()`  | No           | Yes, for measurements that do not have a text value.   |
 
 In addition, the `Data` schema is _open_, meaning it can contain any number of custom columns to further
 enrich observations. Examples of such columns include further ID columns such as `hadm_id` or `icustay_id` to
-uniquely identify events, additional value types such as `text_value`, and more.
+uniquely identify events, additional value types such as `image_path`, and more.
 
 #### Examples
 
@@ -104,6 +105,7 @@ subject_id: int64
 time: timestamp[us]
 code: string
 numeric_value: float
+text_value: large_string
 
 ```
 
@@ -160,6 +162,7 @@ Validation also checks for nullability violations:
 ...     "subject_id": [None, 2, 3],
 ...     "code": ["A", "B", "C"],
 ...     "numeric_value": [1.0, 2.0, 3.0],
+...     "text_value": [None, None, None],
 ... }, schema=Data.schema())
 >>> Data.validate(query_tbl)
 Traceback (most recent call last):
