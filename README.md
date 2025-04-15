@@ -81,15 +81,13 @@ Below, each schema is introduced in detail. Usage examples and a practical demon
 
 The `Data` schema describes a structure for the underlying medical data. It contains the following columns:
 
-1. `text_value`: The text value of the event. This field is nullable for non-text events and is overall
-    optional.
-    | **Column Name** | **Conceptual Description** | **Type** | **Required** | **Nullable** |
-    | \--------------- | ----------------------------------------------------------------------------------------------------------------------------------- | -------------------- | ------------ | ------------------------------------------------------ |
-    | `subject_id` | The ID of the subject this measurement is about. | `pa.int64()` | Yes | No |
-    | `time` | The time of the measurement. | `pa.timestamp('us')` | Yes | Yes, for static measurements |
-    | `code` | The primary categorical descriptor of what is being measured. E.g., the laboratory test being measured or diagnosis being recorded. | `pa.string()` | Yes | No |
-    | `numeric_value` | Any numeric value associated with this measurement (e.g., the laboratory test result). | `pa.float32()` | No | Yes, for measurements that do no have a numeric value. |
-    | `text_value` | Any text value associated with this measurement (e.g., the result of a text-based test, a clinical note). | `pa.large_string()` | No | Yes, for measurements that do not have a text value. |
+| **Column Name** | **Conceptual Description**                                                                                                          | **Type**             | **Required** | **Nullable**                                           |
+| --------------- | ----------------------------------------------------------------------------------------------------------------------------------- | -------------------- | ------------ | ------------------------------------------------------ |
+| `subject_id`    | The ID of the subject this measurement is about.                                                                                    | `pa.int64()`         | Yes          | No                                                     |
+| `time`          | The time of the measurement.                                                                                                        | `pa.timestamp('us')` | Yes          | Yes, for static measurements                           |
+| `code`          | The primary categorical descriptor of what is being measured. E.g., the laboratory test being measured or diagnosis being recorded. | `pa.string()`        | Yes          | No                                                     |
+| `numeric_value` | Any numeric value associated with this measurement (e.g., the laboratory test result).                                              | `pa.float32()`       | No           | Yes, for measurements that do no have a numeric value. |
+| `text_value`    | Any text value associated with this measurement (e.g., the result of a text-based test, a clinical note).                           | `pa.large_string()`  | No           | Yes, for measurements that do not have a text value.   |
 
 In addition, the `Data` schema is _open_, meaning it can contain any number of custom columns to further
 enrich observations. Examples of such columns include further ID columns such as `hadm_id` or `icustay_id` to
