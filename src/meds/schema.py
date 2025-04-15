@@ -36,7 +36,7 @@ class Data(PyArrowSchema):
 
     This is a PyArrow schema that has
       - 3 mandatory columns (`subject_id`, `time`, `code`)
-      - 2 optional column (`numeric_value`, `text_value`)
+      - 2 optional columns (`numeric_value`, `text_value`)
       - Extra columns are allowed.
 
     Attributes:
