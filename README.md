@@ -590,10 +590,10 @@ The dataset metadata associated with this dataset is stored in the `metadata/dat
 
 ```console
 {
-    "dataset_name": "MIMIC-IV",
-    "dataset_version": "3.1:0.0.4",
-    "etl_name": "MEDS_transforms",
-    "etl_version": "0.2.2",
+    "dataset_name": "MIMIC-IV-Demo",
+    "dataset_version": "2.2",
+    "etl_name": "MIMIC_IV_MEDS",
+    "etl_version": "0.0.4",
     "meds_version": "0.3.3",
     "created_at": "2025-03-28T13:47:38.809053"
 }
