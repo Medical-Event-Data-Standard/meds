@@ -32,6 +32,7 @@ compatible tools see the website: https://medical-event-data-standard.github.io/
     - [Organization of task labels](#organization-of-task-labels)
 - [Validation](#validation)
 - [Example: MIMIC-IV demo dataset](#example-mimic-iv-demo-dataset)
+- [Migrating from v0.3](#migrating)
 
 ## Philosophy
 
@@ -666,6 +667,24 @@ pl.from_arrow(split_tbl)
 ```
 
 Note that label information is not included in the basic MIMIC-IV ETL, but you can find out more about how to create labels such as ICU mortality in the documentation of the [ACES package](https://eventstreamaces.readthedocs.io/en/latest/notebooks/examples.html).
+
+## Migrating
+
+Migrating from v0.3 to v0.4 is straightforward, but there are a few changes to be aware of:
+
+1. You can no longer import the constants `subject_id_field`, `time_field`, `numeric_value_dtype` etc.
+    Instead, you can now reference the field names and dtypes directly from the schema classes, e.g.
+    `Data.subject_id_name`, `Data.subject_id_dtype`, etc.
+2. The schema objects exported are no longer raw `pa.Schema` objects or functions, but rather
+    [`flexible_schema.Schema` objects](https://flexible-schema.readthedocs.io/en/latest/). See above for
+    detailed examples of how these can be used.
+3. It is now possible for a valid MEDS table to _not_ have a `numeric_value` column. In such a case, it
+    should be inferred to be universally null.
+4. You are now required to include every unique code in the `metadata/codes.parquet` table.
+
+You can also check out some example commits that perform this migration, such as:
+
+- The [meds_etl upgrade](https://github.com/Medical-Event-Data-Standard/meds_etl/commit/fa620345c6312eb73736ddb6dccda08c4ba2cc98)
 
 ## Springboard
 
