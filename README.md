@@ -35,9 +35,7 @@ compatible tools see the website: https://medical-event-data-standard.github.io/
 
 ## Philosophy
 
-At the heart of MEDS is a simple yet powerful idea: nearly all EHR data can be modeled as a minimal tuple. We
-believe that the essence of a clinical event or measurement can be effectively described using three core
-components:
+At the heart of MEDS is a simple yet powerful idea: nearly all EHR data can be modeled as a minimal tuple:
 
 1. _subject_: The primary entity for which care observations are recorded. Typically, this is an individual
     with a complete sequence of observations. In some datasets (e.g., eICU), a subject may refer to a single
@@ -47,8 +45,9 @@ components:
 
 3. _code_: The descriptor of what measurement is being observed.
 
-This minimalist representation captures the essence of EHR data while providing a consistent foundation for
-further analysis and enrichment.
+> [!NOTE]
+> MEDS also tracks optional "value" modalities that can be observed with any measurement in this tuple, such
+> as a `numeric_value` or `text_value` in addition to the _subject_, _time_, and _code_ elements.
 
 > [!NOTE]
 > In this documentation, we will primarily use the term "measurement" to refer to a single observation about a
@@ -57,7 +56,7 @@ further analysis and enrichment.
 
 ## The Schemas
 
-Building on this philosophy, MEDS defines five primary schema components:
+MEDS defines five primary schema components:
 
 | **Component**     | **Description**                                                                                                                       | **Implementation** |
 | ----------------- | ------------------------------------------------------------------------------------------------------------------------------------- | ------------------ |
@@ -81,13 +80,13 @@ Below, each schema is introduced in detail. Usage examples and a practical demon
 
 The `Data` schema describes a structure for the underlying medical data. It contains the following columns:
 
-| **Column Name** | **Conceptual Description**                                                                                                          | **Type**             | **Required** | **Nullable**                                           |
-| --------------- | ----------------------------------------------------------------------------------------------------------------------------------- | -------------------- | ------------ | ------------------------------------------------------ |
-| `subject_id`    | The ID of the subject this measurement is about.                                                                                    | `pa.int64()`         | Yes          | No                                                     |
-| `time`          | The time of the measurement.                                                                                                        | `pa.timestamp('us')` | Yes          | Yes, for static measurements                           |
-| `code`          | The primary categorical descriptor of what is being measured. E.g., the laboratory test being measured or diagnosis being recorded. | `pa.string()`        | Yes          | No                                                     |
-| `numeric_value` | Any numeric value associated with this measurement (e.g., the laboratory test result).                                              | `pa.float32()`       | No           | Yes, for measurements that do no have a numeric value. |
-| `text_value`    | Any text value associated with this measurement (e.g., the result of a text-based test, a clinical note).                           | `pa.large_string()`  | No           | Yes, for measurements that do not have a text value.   |
+| **Column Name** | **Conceptual Description**                                                                                         | **Type**             | **Required** | **Nullable**                                           |
+| --------------- | ------------------------------------------------------------------------------------------------------------------ | -------------------- | ------------ | ------------------------------------------------------ |
+| `subject_id`    | The ID of the subject (typically the patient).                                                                     | `pa.int64()`         | Yes          | No                                                     |
+| `time`          | The time of the measurement.                                                                                       | `pa.timestamp('us')` | Yes          | Yes, for static measurements                           |
+| `code`          | The primary categorical descriptor of the measurement (e.g., the performed laboratory test or recorded diagnosis). | `pa.string()`        | Yes          | No                                                     |
+| `numeric_value` | Any numeric value associated with this measurement (e.g., the laboratory test result).                             | `pa.float32()`       | No           | Yes, for measurements that do no have a numeric value. |
+| `text_value`    | Any text value associated with this measurement (e.g., the result of a text-based test, a clinical note).          | `pa.large_string()`  | No           | Yes, for measurements that do not have a text value.   |
 
 In addition, the `Data` schema is _open_, meaning it can contain any number of custom columns to further
 enrich observations. Examples of such columns include further ID columns such as `hadm_id` or `icustay_id` to
