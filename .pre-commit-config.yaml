@@ -63,9 +63,7 @@ repos:
           - mdformat-gfm-alerts
           - mdformat-tables
           - mdformat_frontmatter
-          - mdformat-black
           - mdformat-config
-          - mdformat-shfmt
           - mdformat-mkdocs
           - mdformat-toc
 

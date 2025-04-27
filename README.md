@@ -167,9 +167,7 @@ Validation also checks for nullability violations:
 >>> Data.validate(query_tbl)
 Traceback (most recent call last):
     ...
-flexible_schema.exceptions.TableValidationError:
-    Columns that should have no nulls but do: subject_id.
-    Columns that should have some non-nulls but don't: time
+flexible_schema.exceptions.TableValidationError: Columns that should have no nulls but do: subject_id
 
 ```
 

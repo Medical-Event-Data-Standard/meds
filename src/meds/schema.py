@@ -9,7 +9,7 @@ import os
 from typing import ClassVar
 
 import pyarrow as pa
-from flexible_schema import JSONSchema, Nullability, Optional, PyArrowSchema, Required
+from flexible_schema import JSONSchema, Optional, PyArrowSchema, Required
 
 ############################################################
 
@@ -55,7 +55,7 @@ class Data(PyArrowSchema):
     """
 
     subject_id: Required(pa.int64(), nullable=False)
-    time: Required(pa.timestamp("us"), nullable=Nullability.SOME)
+    time: Required(pa.timestamp("us"), nullable=True)
     code: Required(pa.string(), nullable=False)
     numeric_value: Optional(pa.float32())
     text_value: Optional(pa.large_string())
