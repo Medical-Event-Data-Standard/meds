@@ -4,11 +4,11 @@ import jsonschema
 import pyarrow as pa
 
 from meds import (
-    CodeMetadata,
-    Data,
-    DatasetMetadata,
-    Label,
-    SubjectSplit,
+    CodeMetadataSchema,
+    DataSchema,
+    DatasetMetadataSchema,
+    LabelSchema,
+    SubjectSplitSchema,
     held_out_split,
     train_split,
     tuning_split,
@@ -16,13 +16,13 @@ from meds import (
 
 
 def test_consistency():
-    assert Data.code_name == CodeMetadata.code_name
-    assert Data.code_dtype == CodeMetadata.code_dtype
-    assert Data.subject_id_name == SubjectSplit.subject_id_name
-    assert Data.subject_id_dtype == SubjectSplit.subject_id_dtype
-    assert Data.subject_id_name == Label.subject_id_name
-    assert Data.subject_id_dtype == Label.subject_id_dtype
-    assert Data.time_dtype == Label.prediction_time_dtype
+    assert DataSchema.code_name == CodeMetadataSchema.code_name
+    assert DataSchema.code_dtype == CodeMetadataSchema.code_dtype
+    assert DataSchema.subject_id_name == SubjectSplitSchema.subject_id_name
+    assert DataSchema.subject_id_dtype == SubjectSplitSchema.subject_id_dtype
+    assert DataSchema.subject_id_name == LabelSchema.subject_id_name
+    assert DataSchema.subject_id_dtype == LabelSchema.subject_id_dtype
+    assert DataSchema.time_dtype == LabelSchema.prediction_time_dtype
 
 
 def test_data_schema():
@@ -38,7 +38,7 @@ def test_data_schema():
         }
     ]
 
-    _ = Data.align(pa.Table.from_pylist(raw_data))
+    _ = DataSchema.align(pa.Table.from_pylist(raw_data))
 
 
 def test_code_metadata_schema():
@@ -52,7 +52,7 @@ def test_code_metadata_schema():
         }
     ]
 
-    _ = CodeMetadata.align(pa.Table.from_pylist(code_metadata))
+    _ = CodeMetadataSchema.align(pa.Table.from_pylist(code_metadata))
 
 
 def test_subject_splits_schema():
@@ -65,7 +65,7 @@ def test_subject_splits_schema():
         {"subject_id": 123, "split": "special"},
     ]
 
-    _ = SubjectSplit.align(pa.Table.from_pylist(subject_splits_data))
+    _ = SubjectSplitSchema.align(pa.Table.from_pylist(subject_splits_data))
 
 
 def test_label_schema():
@@ -83,23 +83,23 @@ def test_label_schema():
         {"float_value": 0.4},
         {"categorical_value": "text"},
     ]:
-        _ = Label.align(pa.Table.from_pylist([base_label | label_col]))
+        _ = LabelSchema.align(pa.Table.from_pylist([base_label | label_col]))
 
 
 def test_dataset_metadata_schema():
     """Test that mock metadata follows dataset_metadata schema."""
     metadata = {
-        "dataset_name": "Test Dataset",
+        "dataset_name": "Test DataSchemaset",
         "dataset_version": "1.0",
         "etl_name": "Test ETL",
         "etl_version": "1.0",
     }
 
     try:
-        DatasetMetadata.validate(metadata)
-        jsonschema.validate(instance=metadata, schema=DatasetMetadata.schema())
+        DatasetMetadataSchema.validate(metadata)
+        jsonschema.validate(instance=metadata, schema=DatasetMetadataSchema.schema())
 
-        dataset_metadata = DatasetMetadata(**metadata)
-        jsonschema.validate(instance=dataset_metadata.to_dict(), schema=DatasetMetadata.schema())
+        dataset_metadata = DatasetMetadataSchema(**metadata)
+        jsonschema.validate(instance=dataset_metadata.to_dict(), schema=DatasetMetadataSchema.schema())
     except Exception as e:
-        raise AssertionError(f"Dataset metadata does not follow schema: {e}") from e
+        raise AssertionError(f"DataSchemaset metadata does not follow schema: {e}") from e

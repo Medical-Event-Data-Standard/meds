@@ -31,7 +31,7 @@ birth_code = "MEDS_BIRTH"
 death_code = "MEDS_DEATH"
 
 
-class Data(PyArrowSchema):
+class DataSchema(PyArrowSchema):
     """The core data schema for MEDS. Stored in `$MEDS_ROOT/data/$SHARD_NAME.parquet`.
 
     This is a PyArrow schema that has
@@ -66,7 +66,7 @@ class Data(PyArrowSchema):
 # The label schema.
 
 
-class Label(PyArrowSchema):
+class LabelSchema(PyArrowSchema):
     """The label-file schema for MEDS. No dedicated storage path, but stored with parquet files.
 
     This schema may or may not be sharded, and may or may not reflect the same sharding as the core MEDS
@@ -112,7 +112,7 @@ tuning_split = "tuning"  # For ML hyperparameter tuning. Also often called "vali
 held_out_split = "held_out"  # For final ML evaluation. Also often called "test".
 
 
-class SubjectSplit(PyArrowSchema):
+class SubjectSplitSchema(PyArrowSchema):
     """The schema for storing per-subject splits. Stored in `$MEDS_ROOT/metadata/subject_splits.parquet`.
 
     The subject splits are used to divide the subjects into training, tuning, and held-out sets at a
@@ -152,7 +152,7 @@ class SubjectSplit(PyArrowSchema):
 dataset_metadata_filepath = os.path.join("metadata", "dataset.json")
 
 
-class DatasetMetadata(JSONSchema):
+class DatasetMetadataSchema(JSONSchema):
     """The schema for the dataset metadata file. Stored in `$MEDS_ROOT/metadata/dataset.json`.
 
     This is a JSON schema that has only optional fields.
@@ -210,7 +210,7 @@ class DatasetMetadata(JSONSchema):
 code_metadata_filepath = os.path.join("metadata", "codes.parquet")
 
 
-class CodeMetadata(PyArrowSchema):
+class CodeMetadataSchema(PyArrowSchema):
     """The schema for the code metadata file. Stored in `$MEDS_ROOT/metadata/codes.parquet`.
 
     This file contains additional details about the codes in the MEDS dataset. It is guaranteed that all

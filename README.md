@@ -23,11 +23,11 @@ compatible tools see the website: https://medical-event-data-standard.github.io/
 
 - [Philosophy](#philosophy)
 - [The Schemas](#the-schemas)
-    - [The `Data` schema](#the-data-schema)
-    - [The `DatasetMetadata` schema](#the-datasetmetadata-schema)
-    - [The `CodeMetadata` schema](#the-codemetadata-schema)
-    - [The `SubjectSplit` schema](#the-subjectsplit-schema)
-    - [The `Label` schema](#the-label-schema)
+    - [`DataSchema`](#the-data-schema)
+    - [`DatasetMetadataSchema`](#the-datasetmetadata-schema)
+    - [`CodeMetadataSchema`](#the-codemetadata-schema)
+    - [`SubjectSplitSchema`](#the-subjectsplit-schema)
+    - [`LabelSchema`](#the-label-schema)
 - [Organization on Disk](#organization-on-disk)
     - [Organization of task labels](#organization-of-task-labels)
 - [Validation](#validation)
@@ -59,13 +59,13 @@ At the heart of MEDS is a simple yet powerful idea: nearly all EHR data can be m
 
 MEDS defines five primary schema components:
 
-| **Component**     | **Description**                                                                                                                       | **Implementation** |
-| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------- | ------------------ |
-| `Data`            | Describes the core medical data, organized as sequences of subject observations.                                                      | PyArrow            |
-| `DatasetMetadata` | Captures metadata about the source dataset, including its name, version, and details of its conversion to MEDS (e.g., ETL details).   | JSON               |
-| `CodeMetadata`    | Provides metadata for the codes used to describe the types of measurements observed in the dataset.                                   | PyArrow            |
-| `SubjectSplit`    | Stores information on how subjects are partitioned into subpopulations (e.g., training, tuning, held-out) for machine learning tasks. | PyArrow            |
-| `Label`           | Defines the structure for labels that may be predicted about a subject at specific times in the subject record.                       | PyArrow            |
+| **Component**           | **Description**                                                                                                                       | **Implementation** |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------- | ------------------ |
+| `DataSchema`            | Describes the core medical data, organized as sequences of subject observations.                                                      | PyArrow            |
+| `DatasetMetadataSchema` | Captures metadata about the source dataset, including its name, version, and details of its conversion to MEDS (e.g., ETL details).   | JSON               |
+| `CodeMetadataSchema`    | Provides metadata for the codes used to describe the types of measurements observed in the dataset.                                   | PyArrow            |
+| `SubjectSplitSchema`    | Stores information on how subjects are partitioned into subpopulations (e.g., training, tuning, held-out) for machine learning tasks. | PyArrow            |
+| `LabelSchema`           | Defines the structure for labels that may be predicted about a subject at specific times in the subject record.                       | PyArrow            |
 
 Below, each schema is introduced in detail. Usage examples and a practical demonstration with the [MIMIC-IV demo](https://physionet.org/content/mimic-iv-demo/2.2/) dataset are provided in a later section.
 
@@ -77,9 +77,9 @@ Below, each schema is introduced in detail. Usage examples and a practical demon
 > accessors to column names and dtypes as well as table / schema validation or alignment functionality. Under
 > the hood, all schemas are still simple standard PyArrow schemas or JSON schemas, as indicated.
 
-### The `Data` schema
+### The `DataSchema` schema
 
-The `Data` schema describes a structure for the underlying medical data. It contains the following columns:
+The `DataSchema` schema describes a structure for the underlying medical data. It contains the following columns:
 
 | **Column Name** | **Conceptual Description**                                                                                         | **Type**             | **Required** | **Nullable**                                           |
 | --------------- | ------------------------------------------------------------------------------------------------------------------ | -------------------- | ------------ | ------------------------------------------------------ |
@@ -89,7 +89,7 @@ The `Data` schema describes a structure for the underlying medical data. It cont
 | `numeric_value` | Any numeric value associated with this measurement (e.g., the laboratory test result).                             | `pa.float32()`       | No           | Yes, for measurements that do no have a numeric value. |
 | `text_value`    | Any text value associated with this measurement (e.g., the result of a text-based test, a clinical note).          | `pa.large_string()`  | No           | Yes, for measurements that do not have a text value.   |
 
-In addition, the `Data` schema is _open_, meaning it can contain any number of custom columns to further
+In addition, the `DataSchema` schema is _open_, meaning it can contain any number of custom columns to further
 enrich observations. Examples of such columns include further ID columns such as `hadm_id` or `icustay_id` to
 uniquely identify events, additional value types such as `image_path`, and more.
 
@@ -99,8 +99,8 @@ Once you import the schema, you can see the underlying `PyArrow` schema, though 
 optional or nullability requirements:
 
 ```python
->>> from meds import Data
->>> Data.schema()
+>>> from meds import DataSchema
+>>> DataSchema.schema()
 subject_id: int64
 time: timestamp[us]
 code: string
@@ -112,9 +112,9 @@ text_value: large_string
 You can also access the column names and dtypes programmatically via constants for use in your code:
 
 ```python
->>> Data.subject_id_name
+>>> DataSchema.subject_id_name
 'subject_id'
->>> Data.subject_id_dtype
+>>> DataSchema.subject_id_dtype
 DataType(int64)
 
 ```
@@ -136,7 +136,7 @@ return nothing:
 ...     "code": ["A", "B", "C"],
 ...     "extra_column_no_error": [1, 2, None],
 ... })
->>> Data.validate(query_tbl) # No issues, even though numeric_value is missing and there is an extra column
+>>> DataSchema.validate(query_tbl) # No issues, even though numeric_value is missing and there is an extra column
 >>> query_tbl = pa.Table.from_pydict({
 ...     "time": [
 ...         datetime(2021, 3, 1),
@@ -146,7 +146,7 @@ return nothing:
 ...     "subject_id": [1.0, 2.0, 3.0],
 ...     "code": ["A", "B", "C"],
 ... })
->>> Data.validate(query_tbl)
+>>> DataSchema.validate(query_tbl)
 Traceback (most recent call last):
     ...
 flexible_schema.exceptions.SchemaValidationError:
@@ -163,8 +163,8 @@ Validation also checks for nullability violations:
 ...     "code": ["A", "B", "C"],
 ...     "numeric_value": [1.0, 2.0, 3.0],
 ...     "text_value": [None, None, None],
-... }, schema=Data.schema())
->>> Data.validate(query_tbl)
+... }, schema=DataSchema.schema())
+>>> DataSchema.validate(query_tbl)
 Traceback (most recent call last):
     ...
 flexible_schema.exceptions.TableValidationError: Columns that should have no nulls but do: subject_id
@@ -184,7 +184,7 @@ conform to the schema, where possible (or it throws an error):
 ...     "subject_id": [1.0, 2.0, 3.0],
 ...     "code": ["A", "B", "C"],
 ... })
->>> Data.align(query_tbl)
+>>> DataSchema.align(query_tbl)
 pyarrow.Table
 subject_id: int64
 time: timestamp[us]
@@ -202,7 +202,7 @@ code: [["A","B","C"]]
 
 #### Canonical Codes
 
-The `code` column in the `Data` schema is a string that describes the type of measurement being observed. In
+The `code` column in the `DataSchema` schema is a string that describes the type of measurement being observed. In
 general, there are _no restrictions_ on the vocabularies used in this column. However, MEDS does define two
 codes for general use that are likely to be applicable to nearly all MEDS datasets:
 
@@ -218,9 +218,9 @@ MEDS_BIRTH, MEDS_DEATH
 
 ```
 
-### The `DatasetMetadata` schema
+### The `DatasetMetadataSchema` schema
 
-The `DatasetMetadata` JSON schema structures essential information about the source dataset and its conversion
+The `DatasetMetadataSchema` JSON schema structures essential information about the source dataset and its conversion
 to MEDS. It includes details such as the dataset’s name, version, and licensing, as well as specifics about
 the ETL process used for transformation. All fields in this schema are optional.
 
@@ -259,8 +259,8 @@ Like before, you can see the underlying JSON schema, access field names and type
 JSON blobs. You can't align JSON blobs, as that functionality only exists for `PyArrow` tables.
 
 ```python
->>> from meds import DatasetMetadata
->>> DatasetMetadata.schema()
+>>> from meds import DatasetMetadataSchema
+>>> DatasetMetadataSchema.schema()
 {'type': 'object',
  'properties': {'dataset_name': {'type': 'string'},
                 'dataset_version': {'type': 'string'},
@@ -278,12 +278,12 @@ JSON blobs. You can't align JSON blobs, as that functionality only exists for `P
                 'other_extension_columns': {'type': 'array', 'items': {'type': 'string'}}},
  'required': [],
  'additionalProperties': True}
->>> DatasetMetadata.dataset_name_name
+>>> DatasetMetadataSchema.dataset_name_name
 'dataset_name'
->>> DatasetMetadata.dataset_name_dtype
+>>> DatasetMetadataSchema.dataset_name_dtype
 {'type': 'string'}
->>> DatasetMetadata.validate({"dataset_name": "MIMIC-IV"}) # No issue
->>> DatasetMetadata.validate({"dataset_name": "MIMIC-IV", "dataset_version": 3.1}) # Error
+>>> DatasetMetadataSchema.validate({"dataset_name": "MIMIC-IV"}) # No issue
+>>> DatasetMetadataSchema.validate({"dataset_name": "MIMIC-IV", "dataset_version": 3.1}) # Error
 Traceback (most recent call last):
     ...
 flexible_schema.exceptions.TableValidationError: Table validation failed
@@ -295,15 +295,15 @@ include this metadata to provide users with a clear understanding of the data's 
 transformed into the MEDS format. Note that since this schema is about a single entity, it is the only one
 defined as a JSON schema.
 
-### The `CodeMetadata` schema
+### The `CodeMetadataSchema` schema
 
-The `CodeMetadata` schema provides additional details on how to describe the types of measurements (=codes)
+The `CodeMetadataSchema` schema provides additional details on how to describe the types of measurements (=codes)
 observed in the MEDS dataset. It is designed to include metadata such as human-readable descriptions and
-ontological relationships for each code. As with the `Data` schema, the `CodeMetadata` schema can contain any
+ontological relationships for each code. As with the `DataSchema` schema, the `CodeMetadataSchema` schema can contain any
 number of custom columns to further describe the codes contained in the dataset.
 
 > [!IMPORTANT]
-> The `code` column in the `CodeMetadata` schema is required to contain all unique codes found in the
+> The `code` column in the `CodeMetadataSchema` schema is required to contain all unique codes found in the
 > corresponding raw MEDS dataset (though this property may or may not hold after pre-processing steps happen).
 > This ensures that downstream users can reliably scan the "vocabulary" of the dataset without processing all
 > shards. Helpers to ensure this can be added easily to any dataset that is otherwise valid are being added
@@ -311,21 +311,21 @@ number of custom columns to further describe the codes contained in the dataset.
 
 > [!NOTE]
 > It is also not guaranteed that the rows in this table will all be unique w.r.t. the `code` column. Certain
-> datasets may have "code modifiers" that exist as extension columns in the `Data` schema but are essential to
+> datasets may have "code modifiers" that exist as extension columns in the `DataSchema` schema but are essential to
 > capturing the unique meaning of codes -- these columns may expand the number of rows in the code metadata to
 > include all combinations of the code and its modifiers.
 
 | **Column Name** | **Conceptual Description**                                                                                                                                                               | **Type**                | **Required** | **Nullable** |
 | --------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------- | ------------ | ------------ |
-| `code`          | The primary categorical descriptor of a possible measurement in the corresponding dataset. Links to the `Data` schema on the `code` column.                                              | `pa.string()`           | Yes          | No           |
+| `code`          | The primary categorical descriptor of a possible measurement in the corresponding dataset. Links to the `DataSchema` schema on the `code` column.                                        | `pa.string()`           | Yes          | No           |
 | `description`   | A human-readable description of what this code means.                                                                                                                                    | `pa.string()`           | No           | Yes          |
 | `parent_codes`  | A list of string identifiers for higher-level or parent codes in an ontological hierarchy. These may link to other codes in this MEDS dataset or external vocabularies (e.g., OMOP CDM). | `pa.list_(pa.string())` | No           | Yes          |
 
 #### Usage
 
 ```python
->>> from meds import CodeMetadata
->>> CodeMetadata.schema()
+>>> from meds import CodeMetadataSchema
+>>> CodeMetadataSchema.schema()
 code: string
 description: string
 parent_codes: list<item: string>
@@ -333,16 +333,16 @@ parent_codes: list<item: string>
 
 ```
 
-Validation and alignment work much as they do for the `Data` schema.
+Validation and alignment work much as they do for the `DataSchema` schema.
 
 > [!NOTE]
 > The fact that all data codes should appear in this file is not captured in the `validate` or `align` methods
-> on the `CodeMetadata` schema. This is because that validation requires knowledge of not just the code
+> on the `CodeMetadataSchema` schema. This is because that validation requires knowledge of not just the code
 > metadata table, but also the raw data itself.
 
-### The `SubjectSplit` schema
+### The `SubjectSplitSchema` schema
 
-The `SubjectSplit` schema defines how subjects were partitioned into groups for machine learning tasks. This
+The `SubjectSplitSchema` schema defines how subjects were partitioned into groups for machine learning tasks. This
 schema is _closed_ (it does not permit additional columns) and consists of just two mandatory, non-nullable
 fields:
 
@@ -352,8 +352,8 @@ fields:
 #### Examples:
 
 ```python
->>> from meds import SubjectSplit
->>> SubjectSplit.schema()
+>>> from meds import SubjectSplitSchema
+>>> SubjectSplitSchema.schema()
 subject_id: int64
 split: string
 
@@ -378,9 +378,9 @@ train, tuning, held_out
 
 ```
 
-### The `Label` schema
+### The `LabelSchema` schema
 
-The `Label` schema dictates how prediction task labels are stored. It is designed primarily for use with tasks
+The `LabelSchema` schema dictates how prediction task labels are stored. It is designed primarily for use with tasks
 that satisfy the following:
 
 1. A given subject may have one or more labels predicted as-of one or more times within their record (in
@@ -395,7 +395,7 @@ Further, we will use the term `sample` to reflect a single triple of Subject ID,
 label -- i.e., a row in the label dataframe. This will differentiate from a "subject" (who may have a variable
 number of labels observed).
 
-The `Label` schema is _closed_ and contains the following columns. First, it has two mandatory, non-nullable
+The `LabelSchema` schema is _closed_ and contains the following columns. First, it has two mandatory, non-nullable
 columns:
 
 1. `subject_id`: The ID of the subject. This serves as the join key with the core MEDS data.
@@ -412,7 +412,7 @@ columns:
 >   permissible (e.g., a join that matches to the last row with a timestamp less than or equal to the
 >   prediction time).
 
-In addition to the `subject_id` and `prediction_time`, the `Label` schema contains four additional, optional,
+In addition to the `subject_id` and `prediction_time`, the `LabelSchema` schema contains four additional, optional,
 _not nullable_ columns that capture the different kinds of labels that can be observed.
 Note that these columns are optional (they may or may not be present) but _not_ nullable (if they are present,
 they should have uniformly observed values). Only one of these columns should generally be populated:
@@ -426,20 +426,20 @@ they should have uniformly observed values). Only one of these columns should ge
 #### Examples:
 
 ```python
->>> from meds import Label
->>> Label.schema()
+>>> from meds import LabelSchema
+>>> LabelSchema.schema()
 subject_id: int64
 prediction_time: timestamp[us]
 boolean_value: bool
 integer_value: int64
 float_value: float
 categorical_value: string
->>> Label.validate(pa.Table.from_pydict({
+>>> LabelSchema.validate(pa.Table.from_pydict({
 ...     "subject_id": [1, 2, 3],
 ...     "prediction_time": [datetime(2021, 3, 1), datetime(2021, 4, 1), datetime(2021, 5, 1)],
 ...     "boolean_value": [True, False, False],
 ... })) # No issue
->>> Label.validate(pa.Table.from_pydict({
+>>> LabelSchema.validate(pa.Table.from_pydict({
 ...     "subject_id": [1, 2, 3],
 ...     "prediction_time": [datetime(2021, 3, 1), datetime(2021, 4, 1), datetime(2021, 5, 1)],
 ...     "categorical_value": ["high", None, "low"],
@@ -458,24 +458,24 @@ different schema components. Below is an overview of the directory structure:
 
 - **`$MEDS_ROOT/data/*`**
 
-    - Contains the event data files following the `Data` schema.
+    - Contains the event data files following the `DataSchema` schema.
     - Data is stored as a series of (possibly nested) sharded DataFrames in `parquet` format.
     - The file glob `glob("$MEDS_ROOT/data/**/*.parquet")` will match all these sharded files.
     - Each file holds all events for one or more subjects, each of which is sorted by time.
 
 - **`$MEDS_ROOT/metadata/dataset.json`**
 
-    - Contains metadata about the dataset and its production process, conforming to the `DatasetMetadata` schema.
+    - Contains metadata about the dataset and its production process, conforming to the `DatasetMetadataSchema` schema.
 
 - **`$MEDS_ROOT/metadata/codes.parquet`**
 
-    - Holds per-code metadata as defined by the `CodeMetadata` schema.
+    - Holds per-code metadata as defined by the `CodeMetadataSchema` schema.
     - This file lists metadata for every code observed in the full dataset and is not sharded.
     - (Some pre-processing may produce sharded code metadata files, but these reside in subdirectories under `$MEDS_ROOT/metadata/` and are not used for overall metadata operations.)
 
 - **`$MEDS_ROOT/metadata/subject_splits.parquet`**
 
-    - Contains information from the `SubjectSplit` schema, indicating how subjects are divided (e.g., training, tuning, held-out).
+    - Contains information from the `SubjectSplitSchema` schema, indicating how subjects are divided (e.g., training, tuning, held-out).
 
 For ease of use, variables with the expected file paths are predefined:
 
@@ -622,9 +622,9 @@ pl.from_arrow(code_tbl)
 This is explicitly allowed for the code metadata file and validates accordingly:
 
 ```python
-from meds import CodeMetadata
+from meds import CodeMetadataSchema
 
-CodeMetadata.validate(code_tbl)
+CodeMetadataSchema.validate(code_tbl)
 ```
 
 ```console
