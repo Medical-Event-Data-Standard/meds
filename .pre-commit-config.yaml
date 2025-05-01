@@ -1,23 +1,92 @@
+default_language_version:
+  python: python3.12
+
+exclude: "docs/index.md"
+
 repos:
--   repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.4.0
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
     hooks:
-    -   id: check-yaml
-    -   id: end-of-file-fixer
-    -   id: trailing-whitespace
--   repo: https://github.com/psf/black
-    rev: 23.9.1
+      # list of supported hooks: https://pre-commit.com/hooks.html
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-docstring-first
+      - id: check-yaml
+      - id: debug-statements
+      - id: detect-private-key
+      - id: check-executables-have-shebangs
+      - id: check-toml
+      - id: check-case-conflict
+      - id: check-added-large-files
+        args: [--maxkb, "800"]
+
+  # python code formatting, linting, and import sorting using ruff
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.11.7
     hooks:
-    -   id: black
--   repo: https://github.com/PyCQA/flake8
-    rev: 6.1.0
+      # Run the formatter
+      - id: ruff-format
+      # Run the linter
+      - id: ruff
+        args: ["--fix", "--exit-non-zero-on-fix"]
+
+  # python docstring formatting
+  - repo: https://github.com/myint/docformatter
+    rev: v1.7.5
     hooks:
-    -   id: flake8
--   repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v1.5.1
+      - id: docformatter
+        args: [--in-place, --wrap-summaries=110, --wrap-descriptions=110]
+
+  # yaml formatting
+  - repo: https://github.com/pre-commit/mirrors-prettier
+    rev: v4.0.0-alpha.8
     hooks:
-    -   id: mypy
--   repo: https://github.com/PyCQA/isort
-    rev: 5.12.0
+      - id: prettier
+        types: [yaml]
+        exclude: "environment.yaml"
+
+  # shell scripts linter
+  - repo: https://github.com/shellcheck-py/shellcheck-py
+    rev: v0.10.0.1
     hooks:
-    -   id: isort
+      - id: shellcheck
+
+  # md formatting
+  - repo: https://github.com/executablebooks/mdformat
+    rev: 0.7.22
+    hooks:
+      - id: mdformat
+        args: ["--number"]
+        additional_dependencies:
+          - mdformat-ruff
+          - mdformat-gfm
+          - mdformat-gfm-alerts
+          - mdformat-tables
+          - mdformat_frontmatter
+          - mdformat-config
+          - mdformat-mkdocs
+          - mdformat-toc
+
+  # word spelling linter
+  - repo: https://github.com/codespell-project/codespell
+    rev: v2.4.1
+    hooks:
+      - id: codespell
+        args:
+          - --skip=*.ipynb,*.bib,*.svg,pyproject.toml
+          - --ignore-words-list=ehr,crate
+
+  # jupyter notebook cell output clearing
+  - repo: https://github.com/kynan/nbstripout
+    rev: 0.8.1
+    hooks:
+      - id: nbstripout
+
+  # jupyter notebook linting with ruff
+  - repo: https://github.com/nbQA-dev/nbQA
+    rev: 1.9.1
+    hooks:
+      - id: nbqa-ruff
+        args: ["--fix"]
+      - id: nbqa-ruff-format
+        args: ["--line-length=110"]
