@@ -686,6 +686,7 @@ You can also check out some example commits that perform this migration, such as
 
 - The [meds_etl upgrade](https://github.com/Medical-Event-Data-Standard/meds_etl/commit/fa620345c6312eb73736ddb6dccda08c4ba2cc98)
 - The [`meds_testing_helpers` upgrade](https://github.com/Medical-Event-Data-Standard/meds_testing_helpers/pull/34)
+- The [MEDS Transforms upgrade](https://github.com/mmcdermott/MEDS_transforms/pull/323)
 
 ## Springboard
 
