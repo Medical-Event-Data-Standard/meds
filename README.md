@@ -685,6 +685,7 @@ Migrating from v0.3 to v0.4 is straightforward, but there are a few changes to b
 You can also check out some example commits that perform this migration, such as:
 
 - The [meds_etl upgrade](https://github.com/Medical-Event-Data-Standard/meds_etl/commit/fa620345c6312eb73736ddb6dccda08c4ba2cc98)
+- The [`meds_testing_helpers` upgrade](https://github.com/Medical-Event-Data-Standard/meds_testing_helpers/pull/34)
 
 ## Springboard
 
