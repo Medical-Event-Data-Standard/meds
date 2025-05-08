@@ -17,7 +17,10 @@
 
 The Medical Event Data Standard (MEDS) is a data schema for storing streams of medical events, often
 sourced from either Electronic Health Records or claims records. For more information, tutorials, and
-compatible tools see the website: https://medical-event-data-standard.github.io/.
+compatible tools see the website: https://medical-event-data-standard.github.io/. We are encourage
+contributions from the community, please see [the general contribution
+guidelines](https://github.com/Medical-Event-Data-Standard/.github/blob/main/CONTRIBUTING.md) 
+for more information.
 
 ## Table of Contents
 
@@ -39,8 +42,8 @@ compatible tools see the website: https://medical-event-data-standard.github.io/
 At the heart of MEDS is a simple yet powerful idea: nearly all EHR data can be modeled as a minimal tuple:
 
 1. _subject_: The primary entity for which care observations are recorded. Typically, this is an individual
-    with a complete sequence of observations. In some datasets (e.g., eICU), a subject may refer to a single
-    hospital admission rather than the entire individual record.
+   with a complete sequence of observations. In some datasets (e.g., eICU), a subject may refer to a single
+   hospital admission rather than the entire individual record.
 
 2. _time_: The time that a measurement was observed.
 
@@ -60,14 +63,15 @@ At the heart of MEDS is a simple yet powerful idea: nearly all EHR data can be m
 MEDS defines five primary schema components:
 
 | **Component**           | **Description**                                                                                                                       | **Implementation** |
-| ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------- | ------------------ |
+|-------------------------|---------------------------------------------------------------------------------------------------------------------------------------|--------------------|
 | `DataSchema`            | Describes the core medical data, organized as sequences of subject observations.                                                      | PyArrow            |
 | `DatasetMetadataSchema` | Captures metadata about the source dataset, including its name, version, and details of its conversion to MEDS (e.g., ETL details).   | JSON               |
 | `CodeMetadataSchema`    | Provides metadata for the codes used to describe the types of measurements observed in the dataset.                                   | PyArrow            |
 | `SubjectSplitSchema`    | Stores information on how subjects are partitioned into subpopulations (e.g., training, tuning, held-out) for machine learning tasks. | PyArrow            |
 | `LabelSchema`           | Defines the structure for labels that may be predicted about a subject at specific times in the subject record.                       | PyArrow            |
 
-Below, each schema is introduced in detail. Usage examples and a practical demonstration with the [MIMIC-IV demo](https://physionet.org/content/mimic-iv-demo/2.2/) dataset are provided in a later section.
+Below, each schema is introduced in detail. Usage examples and a practical demonstration with
+the [MIMIC-IV demo](https://physionet.org/content/mimic-iv-demo/2.2/) dataset are provided in a later section.
 
 > [!IMPORTANT]
 > Each component is implemented as a Schema class via the
@@ -82,7 +86,7 @@ Below, each schema is introduced in detail. Usage examples and a practical demon
 The `DataSchema` schema describes a structure for the underlying medical data. It contains the following columns:
 
 | **Column Name** | **Conceptual Description**                                                                                         | **Type**             | **Required** | **Nullable**                                           |
-| --------------- | ------------------------------------------------------------------------------------------------------------------ | -------------------- | ------------ | ------------------------------------------------------ |
+|-----------------|--------------------------------------------------------------------------------------------------------------------|----------------------|--------------|--------------------------------------------------------|
 | `subject_id`    | The ID of the subject (typically the patient).                                                                     | `pa.int64()`         | Yes          | No                                                     |
 | `time`          | The time of the measurement.                                                                                       | `pa.timestamp('us')` | Yes          | Yes, for static measurements                           |
 | `code`          | The primary categorical descriptor of the measurement (e.g., the performed laboratory test or recorded diagnosis). | `pa.string()`        | Yes          | No                                                     |
@@ -99,8 +103,8 @@ Once you import the schema, you can see the underlying `PyArrow` schema, though 
 optional or nullability requirements:
 
 ```python
->>> from meds import DataSchema
->>> DataSchema.schema()
+>> > from meds import DataSchema
+>> > DataSchema.schema()
 subject_id: int64
 time: timestamp[us]
 code: string
@@ -112,9 +116,9 @@ text_value: large_string
 You can also access the column names and dtypes programmatically via constants for use in your code:
 
 ```python
->>> DataSchema.subject_id_name
+>> > DataSchema.subject_id_name
 'subject_id'
->>> DataSchema.subject_id_dtype
+>> > DataSchema.subject_id_dtype
 DataType(int64)
 
 ```
@@ -124,50 +128,78 @@ level of a single data shard). Validation will raise an error if the table does 
 return nothing:
 
 ```python
->>> import pyarrow as pa
->>> from datetime import datetime
->>> query_tbl = pa.Table.from_pydict({
-...     "time": [
-...         datetime(2021, 3, 1),
-...         datetime(2021, 4, 1),
-...         datetime(2021, 5, 1),
-...     ],
-...     "subject_id": [1, 2, 3],
-...     "code": ["A", "B", "C"],
-...     "extra_column_no_error": [1, 2, None],
-... })
->>> DataSchema.validate(query_tbl) # No issues, even though numeric_value is missing and there is an extra column
->>> query_tbl = pa.Table.from_pydict({
-...     "time": [
-...         datetime(2021, 3, 1),
-...         datetime(2021, 4, 1),
-...         datetime(2021, 5, 1),
-...     ],
-...     "subject_id": [1.0, 2.0, 3.0],
-...     "code": ["A", "B", "C"],
-... })
->>> DataSchema.validate(query_tbl)
-Traceback (most recent call last):
+>> > import pyarrow as pa
+>> > from datetime import datetime
+>> > query_tbl = pa.Table.from_pydict({
     ...
+"time": [
+    ...         datetime(2021, 3, 1),
+    ...         datetime(2021, 4, 1),
+    ...         datetime(2021, 5, 1),
+    ...],
+...
+"subject_id": [1, 2, 3],
+...
+"code": ["A", "B", "C"],
+...
+"extra_column_no_error": [1, 2, None],
+...})
+>> > DataSchema.validate(query_tbl)  # No issues, even though numeric_value is missing and there is an extra column
+>> > query_tbl = pa.Table.from_pydict({
+    ...
+"time": [
+    ...         datetime(2021, 3, 1),
+    ...         datetime(2021, 4, 1),
+    ...         datetime(2021, 5, 1),
+    ...],
+...
+"subject_id": [1.0, 2.0, 3.0],
+...
+"code": ["A", "B", "C"],
+...})
+>> > DataSchema.validate(query_tbl)
+Traceback(most
+recent
+call
+last):
+...
 flexible_schema.exceptions.SchemaValidationError:
-    Columns with incorrect types: subject_id (want int64, got double)
+Columns
+with incorrect types: subject_id(want
+int64, got
+double)
 
 ```
 
 Validation also checks for nullability violations:
 
 ```python
->>> query_tbl = pa.Table.from_pydict({
-...     "time": [None, None, None],
-...     "subject_id": [None, 2, 3],
-...     "code": ["A", "B", "C"],
-...     "numeric_value": [1.0, 2.0, 3.0],
-...     "text_value": [None, None, None],
-... }, schema=DataSchema.schema())
->>> DataSchema.validate(query_tbl)
-Traceback (most recent call last):
+>> > query_tbl = pa.Table.from_pydict({
     ...
-flexible_schema.exceptions.TableValidationError: Columns that should have no nulls but do: subject_id
+"time": [None, None, None],
+...
+"subject_id": [None, 2, 3],
+...
+"code": ["A", "B", "C"],
+...
+"numeric_value": [1.0, 2.0, 3.0],
+...
+"text_value": [None, None, None],
+...}, schema = DataSchema.schema())
+>> > DataSchema.validate(query_tbl)
+Traceback(most
+recent
+call
+last):
+...
+flexible_schema.exceptions.TableValidationError: Columns
+that
+should
+have
+no
+nulls
+but
+do: subject_id
 
 ```
 
@@ -175,24 +207,29 @@ Alignment performs some modest type coercion and column re-ordering to return a 
 conform to the schema, where possible (or it throws an error):
 
 ```python
->>> query_tbl = pa.Table.from_pydict({
-...     "time": [
-...         datetime(2021, 3, 1),
-...         datetime(2021, 4, 1),
-...         datetime(2021, 5, 1),
-...     ],
-...     "subject_id": [1.0, 2.0, 3.0],
-...     "code": ["A", "B", "C"],
-... })
->>> DataSchema.align(query_tbl)
+>> > query_tbl = pa.Table.from_pydict({
+    ...
+"time": [
+    ...         datetime(2021, 3, 1),
+    ...         datetime(2021, 4, 1),
+    ...         datetime(2021, 5, 1),
+    ...],
+...
+"subject_id": [1.0, 2.0, 3.0],
+...
+"code": ["A", "B", "C"],
+...})
+>> > DataSchema.align(query_tbl)
 pyarrow.Table
 subject_id: int64
 time: timestamp[us]
 code: string
 ----
-subject_id: [[1,2,3]]
-time: [[2021-03-01 00:00:00.000000,2021-04-01 00:00:00.000000,2021-05-01 00:00:00.000000]]
-code: [["A","B","C"]]
+subject_id: [[1, 2, 3]]
+time: [[2021 - 03 - 01 00:00: 00.000000, 2021 - 04 - 01
+00: 00:00.000000, 2021 - 05 - 01
+00: 00:00.000000]]
+code: [["A", "B", "C"]]
 
 ```
 
@@ -207,13 +244,13 @@ general, there are _no restrictions_ on the vocabularies used in this column. Ho
 codes for general use that are likely to be applicable to nearly all MEDS datasets:
 
 | **Code**     | **Import**        | **Description**      | **Absolute or Prefix?**                                         |
-| ------------ | ----------------- | -------------------- | --------------------------------------------------------------- |
+|--------------|-------------------|----------------------|-----------------------------------------------------------------|
 | `MEDS_BIRTH` | `meds.birth_code` | The subject is born. | May be used either alone or as a prefix (e.g., `MEDS_BIRTH//*`) |
 | `MEDS_DEATH` | `meds.death_code` | The subject dies.    | May be used either alone or as a prefix (e.g., `MEDS_DEATH//*`) |
 
 ```python
->>> from meds import birth_code, death_code
->>> print(f"{birth_code}, {death_code}")
+>> > from meds import birth_code, death_code
+>> > print(f"{birth_code}, {death_code}")
 MEDS_BIRTH, MEDS_DEATH
 
 ```
@@ -259,8 +296,8 @@ Like before, you can see the underlying JSON schema, access field names and type
 JSON blobs. You can't align JSON blobs, as that functionality only exists for `PyArrow` tables.
 
 ```python
->>> from meds import DatasetMetadataSchema
->>> DatasetMetadataSchema.schema()
+>> > from meds import DatasetMetadataSchema
+>> > DatasetMetadataSchema.schema()
 {'type': 'object',
  'properties': {'dataset_name': {'type': 'string'},
                 'dataset_version': {'type': 'string'},
@@ -278,15 +315,20 @@ JSON blobs. You can't align JSON blobs, as that functionality only exists for `P
                 'other_extension_columns': {'type': 'array', 'items': {'type': 'string'}}},
  'required': [],
  'additionalProperties': True}
->>> DatasetMetadataSchema.dataset_name_name
+>> > DatasetMetadataSchema.dataset_name_name
 'dataset_name'
->>> DatasetMetadataSchema.dataset_name_dtype
+>> > DatasetMetadataSchema.dataset_name_dtype
 {'type': 'string'}
->>> DatasetMetadataSchema.validate({"dataset_name": "MIMIC-IV"}) # No issue
->>> DatasetMetadataSchema.validate({"dataset_name": "MIMIC-IV", "dataset_version": 3.1}) # Error
-Traceback (most recent call last):
-    ...
-flexible_schema.exceptions.TableValidationError: Table validation failed
+>> > DatasetMetadataSchema.validate({"dataset_name": "MIMIC-IV"})  # No issue
+>> > DatasetMetadataSchema.validate({"dataset_name": "MIMIC-IV", "dataset_version": 3.1})  # Error
+Traceback(most
+recent
+call
+last):
+...
+flexible_schema.exceptions.TableValidationError: Table
+validation
+failed
 
 ```
 
@@ -299,7 +341,8 @@ defined as a JSON schema.
 
 The `CodeMetadataSchema` schema provides additional details on how to describe the types of measurements (=codes)
 observed in the MEDS dataset. It is designed to include metadata such as human-readable descriptions and
-ontological relationships for each code. As with the `DataSchema` schema, the `CodeMetadataSchema` schema can contain any
+ontological relationships for each code. As with the `DataSchema` schema, the `CodeMetadataSchema` schema can contain
+any
 number of custom columns to further describe the codes contained in the dataset.
 
 > [!IMPORTANT]
@@ -316,7 +359,7 @@ number of custom columns to further describe the codes contained in the dataset.
 > include all combinations of the code and its modifiers.
 
 | **Column Name** | **Conceptual Description**                                                                                                                                                               | **Type**                | **Required** | **Nullable** |
-| --------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------- | ------------ | ------------ |
+|-----------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-------------------------|--------------|--------------|
 | `code`          | The primary categorical descriptor of a possible measurement in the corresponding dataset. Links to the `DataSchema` schema on the `code` column.                                        | `pa.string()`           | Yes          | No           |
 | `description`   | A human-readable description of what this code means.                                                                                                                                    | `pa.string()`           | No           | Yes          |
 | `parent_codes`  | A list of string identifiers for higher-level or parent codes in an ontological hierarchy. These may link to other codes in this MEDS dataset or external vocabularies (e.g., OMOP CDM). | `pa.list_(pa.string())` | No           | Yes          |
@@ -324,12 +367,13 @@ number of custom columns to further describe the codes contained in the dataset.
 #### Usage
 
 ```python
->>> from meds import CodeMetadataSchema
->>> CodeMetadataSchema.schema()
+>> > from meds import CodeMetadataSchema
+>> > CodeMetadataSchema.schema()
 code: string
 description: string
-parent_codes: list<item: string>
-  child 0, item: string
+parent_codes: list < item: string >
+child
+0, item: string
 
 ```
 
@@ -352,8 +396,8 @@ fields:
 #### Examples:
 
 ```python
->>> from meds import SubjectSplitSchema
->>> SubjectSplitSchema.schema()
+>> > from meds import SubjectSplitSchema
+>> > SubjectSplitSchema.schema()
 subject_id: int64
 split: string
 
@@ -365,15 +409,15 @@ In line with common practice, MEDS also defines three sentinel split names for c
 
 1. `train`: For model training.
 2. `tuning`: For hyperparameter tuning (often referred to alternatively as the "validation" or "dev" set).
-    In many cases, a tuning split may not be necessary and can be merged with the training set.
+   In many cases, a tuning split may not be necessary and can be merged with the training set.
 3. `held_out`: For final model evaluation (also commonly called the "test" set). When performing benchmarking,
-    this split should **not** be used for any purpose except final model validation.
+   this split should **not** be used for any purpose except final model validation.
 
 These sentinel names are available as exported variables:
 
 ```python
->>> from meds import train_split, tuning_split, held_out_split
->>> print(f"{train_split}, {tuning_split}, {held_out_split}")
+>> > from meds import train_split, tuning_split, held_out_split
+>> > print(f"{train_split}, {tuning_split}, {held_out_split}")
 train, tuning, held_out
 
 ```
@@ -384,7 +428,7 @@ The `LabelSchema` schema dictates how prediction task labels are stored. It is d
 that satisfy the following:
 
 1. A given subject may have one or more labels predicted as-of one or more times within their record (in
-    contrast to, for example, a prediction that is made on every event in the record).
+   contrast to, for example, a prediction that is made on every event in the record).
 2. The label for a given task is either
     - boolean (e.g., "will the subject die?").
     - numeric (e.g., "what is the subject's blood pressure?").
@@ -405,12 +449,12 @@ columns:
 > Note that:
 >
 > - The prediction time is neither the _time of the predicted event/label_ nor precisely the time _at which
->   the prediction would be made in deployment_, but rather signifies the _inclusive endpoint_ of the data
->   that can be used to predict the label for the given sample.
+    > the prediction would be made in deployment_, but rather signifies the _inclusive endpoint_ of the data
+    > that can be used to predict the label for the given sample.
 > - The prediction time _may not correspond to an observed event time for the subject in the data._ This
->   means you will need to generally use "as-of" joins to capture the relevant windows of time that are
->   permissible (e.g., a join that matches to the last row with a timestamp less than or equal to the
->   prediction time).
+    > means you will need to generally use "as-of" joins to capture the relevant windows of time that are
+    > permissible (e.g., a join that matches to the last row with a timestamp less than or equal to the
+    > prediction time).
 
 In addition to the `subject_id` and `prediction_time`, the `LabelSchema` schema contains four additional, optional,
 _not nullable_ columns that capture the different kinds of labels that can be observed.
@@ -419,35 +463,51 @@ they should have uniformly observed values). Only one of these columns should ge
 
 1. `boolean_value`: The label for a boolean task.
 2. `integer_value`: The label for tasks taking on integral values (e.g., ordinal tasks or integral numeric
-    tasks).
+   tasks).
 3. `float_value`: The label for tasks taking on float values (e.g., continuous numeric tasks)
 4. `categorical_value`: The label for tasks taking on categorical values.
 
 #### Examples:
 
 ```python
->>> from meds import LabelSchema
->>> LabelSchema.schema()
+>> > from meds import LabelSchema
+>> > LabelSchema.schema()
 subject_id: int64
 prediction_time: timestamp[us]
 boolean_value: bool
 integer_value: int64
 float_value: float
 categorical_value: string
->>> LabelSchema.validate(pa.Table.from_pydict({
-...     "subject_id": [1, 2, 3],
-...     "prediction_time": [datetime(2021, 3, 1), datetime(2021, 4, 1), datetime(2021, 5, 1)],
-...     "boolean_value": [True, False, False],
-... })) # No issue
->>> LabelSchema.validate(pa.Table.from_pydict({
-...     "subject_id": [1, 2, 3],
-...     "prediction_time": [datetime(2021, 3, 1), datetime(2021, 4, 1), datetime(2021, 5, 1)],
-...     "categorical_value": ["high", None, "low"],
-... }))
-Traceback (most recent call last):
+>> > LabelSchema.validate(pa.Table.from_pydict({
     ...
+"subject_id": [1, 2, 3],
+...
+"prediction_time": [datetime(2021, 3, 1), datetime(2021, 4, 1), datetime(2021, 5, 1)],
+...
+"boolean_value": [True, False, False],
+...}))  # No issue
+>> > LabelSchema.validate(pa.Table.from_pydict({
+    ...
+"subject_id": [1, 2, 3],
+...
+"prediction_time": [datetime(2021, 3, 1), datetime(2021, 4, 1), datetime(2021, 5, 1)],
+...
+"categorical_value": ["high", None, "low"],
+...}))
+Traceback(most
+recent
+call
+last):
+...
 flexible_schema.exceptions.TableValidationError:
-    Columns that should have no nulls but do: categorical_value
+Columns
+that
+should
+have
+no
+nulls
+but
+do: categorical_value
 
 ```
 
@@ -471,23 +531,33 @@ different schema components. Below is an overview of the directory structure:
 
     - Holds per-code metadata as defined by the `CodeMetadataSchema` schema.
     - This file lists metadata for every code observed in the full dataset and is not sharded.
-    - (Some pre-processing may produce sharded code metadata files, but these reside in subdirectories under `$MEDS_ROOT/metadata/` and are not used for overall metadata operations.)
+    - (Some pre-processing may produce sharded code metadata files, but these reside in subdirectories under
+      `$MEDS_ROOT/metadata/` and are not used for overall metadata operations.)
 
 - **`$MEDS_ROOT/metadata/subject_splits.parquet`**
 
-    - Contains information from the `SubjectSplitSchema` schema, indicating how subjects are divided (e.g., training, tuning, held-out).
+    - Contains information from the `SubjectSplitSchema` schema, indicating how subjects are divided (e.g., training,
+      tuning, held-out).
 
 For ease of use, variables with the expected file paths are predefined:
 
 ```python
->>> from meds import (
-...    data_subdirectory,
-...    dataset_metadata_filepath,
-...    code_metadata_filepath,
-...    subject_splits_filepath,
+>> > from meds import (
+
+...
+data_subdirectory,
+...
+dataset_metadata_filepath,
+...
+code_metadata_filepath,
+...
+subject_splits_filepath,
 ... )
->>> print(data_subdirectory, dataset_metadata_filepath, code_metadata_filepath, subject_splits_filepath)
-data metadata/dataset.json metadata/codes.parquet metadata/subject_splits.parquet
+>> > print(data_subdirectory, dataset_metadata_filepath, code_metadata_filepath, subject_splits_filepath)
+data
+metadata / dataset.json
+metadata / codes.parquet
+metadata / subject_splits.parquet
 
 ```
 
@@ -501,18 +571,24 @@ data metadata/dataset.json metadata/codes.parquet metadata/subject_splits.parque
 
 Task label DataFrames are stored separately. Their location depends on two parameters:
 
-- **`$TASK_ROOT`**: The root directory for task label data (can be a subdirectory of `$MEDS_ROOT`, e.g., `$MEDS_ROOT/tasks`).
-- **`$TASK_NAME`**: A parameter to separate different tasks (this value may include `/` characters, creating nested directories).
+- **`$TASK_ROOT`**: The root directory for task label data (can be a subdirectory of `$MEDS_ROOT`, e.g.,
+  `$MEDS_ROOT/tasks`).
+- **`$TASK_NAME`**: A parameter to separate different tasks (this value may include `/` characters, creating nested
+  directories).
 
 The file glob `glob($TASK_ROOT/$TASK_NAME/**/*.parquet)` is used to capture all task label files. Note that:
 
 - The sharding of task label files may differ from that of the raw data files.
-- In some cases, a shard may not contain any task labels if no subject qualifies for the task; such files might be empty or missing.
+- In some cases, a shard may not contain any task labels if no subject qualifies for the task; such files might be empty
+  or missing.
 
 ## Example: MIMIC-IV demo dataset
 
 Let's look at the publicly available [MIMIC-IV demo](https://physionet.org/content/mimic-iv-demo/2.2/) dataset
-for a concrete example of what a MEDS-compliant dataset may look like. We use [MIMIC_IV_MEDS](https://github.com/Medical-Event-Data-Standard/MIMIC_IV_MEDS) ETL pipeline to automatically download the MIMIC-IV demo dataset and convert it into MEDS format. After running the pipeline, we get a directory structure that looks like this:
+for a concrete example of what a MEDS-compliant dataset may look like. We
+use [MIMIC_IV_MEDS](https://github.com/Medical-Event-Data-Standard/MIMIC_IV_MEDS) ETL pipeline to automatically download
+the MIMIC-IV demo dataset and convert it into MEDS format. After running the pipeline, we get a directory structure that
+looks like this:
 
 ```console
 MEDS_cohort
@@ -532,9 +608,14 @@ MEDS_cohort
 └── ...
 ```
 
-We can immediately see that the data is organized as described in the [Organization on Disk](#organization-on-disk) section, with the `data` directory containing the raw underlying event data and the `metadata` directory containing the metadata. The `data` directory contains three subdirectories, `train`, `tuning`, and `held_out`, corresponding to our default split names and each containing a data file in parquet format (since the MIMIC-IV demo dataset is small, we only have one data file per split but in general we would expect multiple shards).
+We can immediately see that the data is organized as described in the [Organization on Disk](#organization-on-disk)
+section, with the `data` directory containing the raw underlying event data and the `metadata` directory containing the
+metadata. The `data` directory contains three subdirectories, `train`, `tuning`, and `held_out`, corresponding to our
+default split names and each containing a data file in parquet format (since the MIMIC-IV demo dataset is small, we only
+have one data file per split but in general we would expect multiple shards).
 
-Let's take a look at the contents of one of the data files in the `train` split, which looks something like this (note that we are using the polars package for better readability):
+Let's take a look at the contents of one of the data files in the `train` split, which looks something like this (note
+that we are using the polars package for better readability):
 
 ```python
 from pyarrow import parquet as pq
@@ -559,7 +640,9 @@ shape: (803_992, 25)
 └────────────┴─────────────────────┴──────────────────────┴───────────────┴────────────┴───┘
 ```
 
-For each entry, we have the `subject_id` of the person this observation is about, the `time` that the event was recorded, the `code` that describes what this information is about, and some optional fields (in this case `numeric_value`s and `text_value`s associated with the event).
+For each entry, we have the `subject_id` of the person this observation is about, the `time` that the event was
+recorded, the `code` that describes what this information is about, and some optional fields (in this case
+`numeric_value`s and `text_value`s associated with the event).
 
 ```python
 from meds import Data
@@ -666,25 +749,29 @@ pl.from_arrow(split_tbl)
 └────────────┴──────────┘
 ```
 
-Note that label information is not included in the basic MIMIC-IV ETL, but you can find out more about how to create labels such as ICU mortality in the documentation of the [ACES package](https://eventstreamaces.readthedocs.io/en/latest/notebooks/examples.html).
+Note that label information is not included in the basic MIMIC-IV ETL, but you can find out more about how to create
+labels such as ICU mortality in the documentation of
+the [ACES package](https://eventstreamaces.readthedocs.io/en/latest/notebooks/examples.html).
 
 ## Migrating
 
 Migrating from v0.3 to v0.4 is straightforward, but there are a few changes to be aware of:
 
 1. You can no longer import the constants `subject_id_field`, `time_field`, `numeric_value_dtype` etc.
-    Instead, you can now reference the field names and dtypes directly from the schema classes, e.g.
-    `Data.subject_id_name`, `Data.subject_id_dtype`, etc.
+   Instead, you can now reference the field names and dtypes directly from the schema classes, e.g.
+   `Data.subject_id_name`, `Data.subject_id_dtype`, etc.
 2. The schema objects exported are no longer raw `pa.Schema` objects or functions, but rather
-    [`flexible_schema.Schema` objects](https://flexible-schema.readthedocs.io/en/latest/). See above for
-    detailed examples of how these can be used.
+   [`flexible_schema.Schema` objects](https://flexible-schema.readthedocs.io/en/latest/). See above for
+   detailed examples of how these can be used.
 3. It is now possible for a valid MEDS table to _not_ have a `numeric_value` column. In such a case, it
-    should be inferred to be universally null.
+   should be inferred to be universally null.
 4. You are now required to include every unique code in the `metadata/codes.parquet` table.
 
 You can also check out some example commits that perform this migration, such as:
 
-- The [meds_etl upgrade](https://github.com/Medical-Event-Data-Standard/meds_etl/commit/fa620345c6312eb73736ddb6dccda08c4ba2cc98)
+-
+
+The [meds_etl upgrade](https://github.com/Medical-Event-Data-Standard/meds_etl/commit/fa620345c6312eb73736ddb6dccda08c4ba2cc98)
 
 ## Springboard
 
