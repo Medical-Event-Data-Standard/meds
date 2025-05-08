@@ -17,7 +17,7 @@
 
 The Medical Event Data Standard (MEDS) is a data schema for storing streams of medical events, often
 sourced from either Electronic Health Records or claims records. For more information, tutorials, and
-compatible tools see the website: https://medical-event-data-standard.github.io/. We are encourage
+compatible tools see the website: https://medical-event-data-standard.github.io/. We encourage
 contributions from the community, please see [the general contribution
 guidelines](https://github.com/Medical-Event-Data-Standard/.github/blob/main/CONTRIBUTING.md) 
 for more information.
