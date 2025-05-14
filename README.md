@@ -7,8 +7,8 @@
 [![PyPI - Version](https://img.shields.io/pypi/v/meds)](https://pypi.org/project/meds/)
 ![python](https://img.shields.io/badge/-Python_3.10-blue?logo=python&logoColor=white)
 [![codecov](https://codecov.io/gh/Medical-Event-Data-Standard/meds/graph/badge.svg?token=89SKXPKVRA)](https://codecov.io/gh/Medical-Event-Data-Standard/meds)
-[![tests](https://github.com/Medical-Event-Data-Standard/meds/actions/workflows/tests.yaml/badge.svg)](https://github.com/Medical-Event-Data-Standard/meds/actions/workflows/tests.yml)
-[![code-quality](https://github.com/Medical-Event-Data-Standard/meds/actions/workflows/code-quality-main.yaml/badge.svg)](https://github.com/Medical-Event-Data-Standard/meds/actions/workflows/code-quality-main.yaml)
+[![tests](https://github.com/Medical-Event-Data-Standard/meds/actions/workflows/tests.yml/badge.svg)](https://github.com/Medical-Event-Data-Standard/meds/actions/workflows/tests.yml)
+[![code-quality](https://github.com/Medical-Event-Data-Standard/meds/actions/workflows/code-quality-main.yml/badge.svg)](https://github.com/Medical-Event-Data-Standard/meds/actions/workflows/code-quality-main.yaml)
 [![license](https://img.shields.io/badge/License-MIT-green.svg?labelColor=gray)](https://github.com/Medical-Event-Data-Standard/meds#license)
 [![PRs](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/Medical-Event-Data-Standard/meds/pulls)
 [![contributors](https://img.shields.io/github/contributors/Medical-Event-Data-Standard/meds.svg)](https://github.com/Medical-Event-Data-Standard/meds/graphs/contributors)
@@ -685,6 +685,8 @@ Migrating from v0.3 to v0.4 is straightforward, but there are a few changes to b
 You can also check out some example commits that perform this migration, such as:
 
 - The [meds_etl upgrade](https://github.com/Medical-Event-Data-Standard/meds_etl/commit/fa620345c6312eb73736ddb6dccda08c4ba2cc98)
+- The [`meds_testing_helpers` upgrade](https://github.com/Medical-Event-Data-Standard/meds_testing_helpers/pull/34)
+- The [MEDS Transforms upgrade](https://github.com/mmcdermott/MEDS_transforms/pull/323)
 
 ## Springboard
 
