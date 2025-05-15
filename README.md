@@ -679,7 +679,7 @@ Migrating from v0.3 to v0.4 is straightforward, but there are a few changes to b
 
 1. You can no longer import the constants `subject_id_field`, `time_field`, `numeric_value_dtype` etc.
     Instead, you can now reference the field names and dtypes directly from the schema classes, e.g.
-    `Data.subject_id_name`, `Data.subject_id_dtype`, etc.
+    `DataSchema.subject_id_name`, `DataSchema.subject_id_dtype`, etc.
 2. The schema objects exported are no longer raw `pa.Schema` objects or functions, but rather
     [`flexible_schema.Schema` objects](https://flexible-schema.readthedocs.io/en/latest/). See above for
     detailed examples of how these can be used.
