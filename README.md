@@ -6,7 +6,6 @@
   </picture>
 </p>
 
-
 # Medical Event Data Standard
 
 [![PyPI - Version](https://img.shields.io/pypi/v/meds)](https://pypi.org/project/meds/)
@@ -410,12 +409,12 @@ columns:
 > Note that:
 >
 > - The prediction time is neither the _time of the predicted event/label_ nor precisely the time _at which
->   the prediction would be made in deployment_, but rather signifies the _inclusive endpoint_ of the data
->   that can be used to predict the label for the given sample.
+>     the prediction would be made in deployment_, but rather signifies the _inclusive endpoint_ of the data
+>     that can be used to predict the label for the given sample.
 > - The prediction time _may not correspond to an observed event time for the subject in the data._ This
->   means you will need to generally use "as-of" joins to capture the relevant windows of time that are
->   permissible (e.g., a join that matches to the last row with a timestamp less than or equal to the
->   prediction time).
+>     means you will need to generally use "as-of" joins to capture the relevant windows of time that are
+>     permissible (e.g., a join that matches to the last row with a timestamp less than or equal to the
+>     prediction time).
 
 In addition to the `subject_id` and `prediction_time`, the `LabelSchema` schema contains four additional, optional,
 _not nullable_ columns that capture the different kinds of labels that can be observed.
