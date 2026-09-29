@@ -514,6 +514,49 @@ The file glob `glob($TASK_ROOT/$TASK_NAME/**/*.parquet)` is used to capture all 
 - The sharding of task label files may differ from that of the raw data files.
 - In some cases, a shard may not contain any task labels if no subject qualifies for the task; such files might be empty or missing.
 
+## Validation
+
+The schema classes above validate the *structure* of a single table (column names, dtypes, nullability),
+but several MEDS requirements span rows, shards, or files and are not captured by per-table validation --
+for example, that no subject is split across shards, or that every code observed in the data appears in
+`metadata/codes.parquet`. The `meds.validation` module implements these dataset-level checks and temporal
+consistency checks, and is designed to run in CI over a freshly produced MEDS dataset:
+
+```python
+from meds import validate_dataset
+
+report = validate_dataset("/path/to/meds_dataset")
+print(report)
+```
+
+```console
+[PASS] shard_discovery: found 3 shard(s)
+[PASS] shard_readable: data/train/0.parquet
+[PASS] shard_schema_conformance
+[PASS] subject_contiguity
+[PASS] subject_time_ordering
+[PASS] birth_event_ordering
+[PASS] death_event_ordering
+...
+[PASS] code_vocabulary_coverage
+stats: n_shards=3, n_subjects=100, n_events=803992, n_data_codes=3817, vocabulary_coverage=3817/3817 metadata codes observed in data
+result: PASS
+```
+
+A `meds-validate` command-line script is also installed with the package, exiting 0 when every check
+passes and 1 otherwise, so it can be used directly as a CI step:
+
+```console
+$ meds-validate /path/to/meds_dataset --fail-fast
+```
+
+Per-shard checks cover schema conformance, subject contiguity, per-subject time ordering (static
+null-time measurements first, then ascending timestamps), and `MEDS_BIRTH`/`MEDS_DEATH` consistency
+(at most one birth/death per subject, no events before birth or after death). Dataset-level checks cover
+shard discovery, subject exclusivity across shards, code vocabulary coverage against
+`metadata/codes.parquet`, and conformance of the `metadata/` files. See `meds.validation` for the full
+check list.
+
 ## Example: MIMIC-IV demo dataset
 
 Let's look at the publicly available [MIMIC-IV demo](https://physionet.org/content/mimic-iv-demo/2.2/) dataset
