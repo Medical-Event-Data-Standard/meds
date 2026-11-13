@@ -1,0 +1,73 @@
+cff-version: 1.2.0
+message: If you use this software, please cite the article below.
+type: software
+title: MEDS — An Emerging Data Standard and Ecosystem for Health AI Research
+authors: &id001
+- given-names: Matthew B. A.
+  family-names: McDermott
+- given-names: Ethan
+  family-names: Steinberg
+- given-names: Jason A.
+  family-names: Fries
+- given-names: Robin P.
+  family-names: van de Water
+- given-names: Chao
+  family-names: Pang
+- given-names: Patrick
+  family-names: Rockenschaub
+- given-names: Pawel
+  family-names: Renc
+- given-names: Jungwoo
+  family-names: Oh
+- given-names: Kamilė
+  family-names: Stankevičiūtė
+- given-names: Justin
+  family-names: Xu
+- given-names: Tom J.
+  family-names: Pollard
+- given-names: Nassim
+  family-names: Oufattole
+- given-names: Michael
+  family-names: Wornow
+- given-names: Teya S.
+  family-names: Bergamaschi
+- given-names: Hyewon
+  family-names: Jeong
+- given-names: Simon A.
+  family-names: Lee
+- given-names: Vincent
+  family-names: Jeanselme
+- given-names: Kiril V.
+  family-names: Klein
+- given-names: Mikkel
+  family-names: Odgaard
+- given-names: Maria E.
+  family-names: Montgomery
+- given-names: Arkadiusz
+  family-names: Sitek
+- given-names: Mads
+  family-names: Nielsen
+- given-names: Jeffrey N.
+  family-names: Chiang
+- given-names: Noa
+  family-names: Dagan
+- given-names: Isaac
+  family-names: Kohane
+- given-names: Shalmali
+  family-names: Joshi
+- given-names: Edward
+  family-names: Choi
+- given-names: Nigam H.
+  family-names: Shah
+preferred-citation:
+  type: article
+  title: MEDS — An Emerging Data Standard and Ecosystem for Health AI Research
+  authors: *id001
+  journal: NEJM AI
+  volume: 3
+  issue: 6
+  pages: AIra2501253
+  publisher: Massachusetts Medical Society
+  doi: 10.1056/AIra2501253
+  year: 2026
+  month: 5
