@@ -9,13 +9,14 @@
 # Medical Event Data Standard
 
 [![PyPI - Version](https://img.shields.io/pypi/v/meds)](https://pypi.org/project/meds/)
-![python](https://img.shields.io/badge/-Python_3.10-blue?logo=python&logoColor=white)
+![python](https://img.shields.io/badge/python-3.10_%7C_3.11_%7C_3.12_%7C_3.13_%7C_3.14-blue?logo=python&logoColor=white)
 [![codecov](https://codecov.io/gh/Medical-Event-Data-Standard/meds/graph/badge.svg?token=89SKXPKVRA)](https://codecov.io/gh/Medical-Event-Data-Standard/meds)
 [![tests](https://github.com/Medical-Event-Data-Standard/meds/actions/workflows/tests.yml/badge.svg)](https://github.com/Medical-Event-Data-Standard/meds/actions/workflows/tests.yml)
 [![code-quality](https://github.com/Medical-Event-Data-Standard/meds/actions/workflows/code-quality-main.yml/badge.svg)](https://github.com/Medical-Event-Data-Standard/meds/actions/workflows/code-quality-main.yml)
 [![license](https://img.shields.io/badge/License-Apache_2.0-green.svg?labelColor=gray)](https://github.com/Medical-Event-Data-Standard/meds/blob/main/LICENSE)
 [![PRs](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/Medical-Event-Data-Standard/meds/pulls)
 [![contributors](https://img.shields.io/github/contributors/Medical-Event-Data-Standard/meds.svg)](https://github.com/Medical-Event-Data-Standard/meds/graphs/contributors)
+[![NEJM AI](https://img.shields.io/badge/NEJM_AI-10.1056%2FAIra2501253-a51c30)](https://doi.org/10.1056/AIra2501253)
 [![DOI](https://zenodo.org/badge/728366599.svg)](https://doi.org/10.5281/zenodo.17535826)
 
 ![The MEDS data schema](static/data_figure.svg)
@@ -23,6 +24,10 @@
 The Medical Event Data Standard (MEDS) is a data schema for storing streams of medical events, often
 sourced from either Electronic Health Records or claims records. For more information, tutorials, and
 compatible tools see the website: https://medical-event-data-standard.github.io/.
+
+MEDS is described in our paper in NEJM AI:
+[MEDS — An Emerging Data Standard and Ecosystem for Health AI Research](https://doi.org/10.1056/AIra2501253).
+If you use MEDS in your work, please [cite it](#citation).
 
 ## Table of Contents
 
@@ -38,6 +43,8 @@ compatible tools see the website: https://medical-event-data-standard.github.io/
 - [Validation](#validation)
 - [Example: MIMIC-IV demo dataset](#example-mimic-iv-demo-dataset)
 - [Migrating from v0.3](#migrating)
+- [Springboard](#springboard)
+- [Citation](#citation)
 
 ## Philosophy
 
@@ -700,3 +707,55 @@ Our website contains tutorials for getting started with MEDS and information abo
 - [Converting to MEDS](https://medical-event-data-standard.github.io/docs/tutorial-basics/converting_to_MEDS)
 - [Modeling over MEDS data](https://medical-event-data-standard.github.io/docs/tutorial-basics/modeling_over_MEDS_data)
 - [Public Research Resources](https://medical-event-data-standard.github.io/docs/MEDS_datasets_and_models)
+
+## Citation
+
+If you use MEDS in your work, please cite our NEJM AI paper:
+
+> Matthew B. A. McDermott, Ethan Steinberg, Jason A. Fries, Robin P. van de Water, Chao Pang, Patrick Rockenschaub, Pawel Renc, Jungwoo Oh, Kamilė Stankevičiūtė, Justin Xu, Tom J. Pollard, Nassim Oufattole, Michael Wornow, Teya S. Bergamaschi, Hyewon Jeong, Simon A. Lee, Vincent Jeanselme, Kiril V. Klein, Mikkel Odgaard, Maria E. Montgomery, Arkadiusz Sitek, Mads Nielsen, Jeffrey N. Chiang, Noa Dagan, Isaac Kohane, Shalmali Joshi, Edward Choi, Nigam H. Shah. MEDS — An Emerging Data Standard and Ecosystem for Health AI Research. *NEJM AI* 2026;3(6).
+> DOI: [10.1056/AIra2501253](https://doi.org/10.1056/AIra2501253)
+
+```bibtex
+@article{mcdermott2026meds,
+  title        = {MEDS --- An Emerging Data Standard and Ecosystem for Health AI Research},
+  author       = {McDermott, Matthew B. A. and
+                 Steinberg, Ethan and
+                 Fries, Jason A. and
+                 van de Water, Robin P. and
+                 Pang, Chao and
+                 Rockenschaub, Patrick and
+                 Renc, Pawel and
+                 Oh, Jungwoo and
+                 Stankevičiūtė, Kamilė and
+                 Xu, Justin and
+                 Pollard, Tom J. and
+                 Oufattole, Nassim and
+                 Wornow, Michael and
+                 Bergamaschi, Teya S. and
+                 Jeong, Hyewon and
+                 Lee, Simon A. and
+                 Jeanselme, Vincent and
+                 Klein, Kiril V. and
+                 Odgaard, Mikkel and
+                 Montgomery, Maria E. and
+                 Sitek, Arkadiusz and
+                 Nielsen, Mads and
+                 Chiang, Jeffrey N. and
+                 Dagan, Noa and
+                 Kohane, Isaac and
+                 Joshi, Shalmali and
+                 Choi, Edward and
+                 Shah, Nigam H.},
+  journal      = {NEJM AI},
+  volume       = {3},
+  number       = {6},
+  pages        = {AIra2501253},
+  year         = {2026},
+  publisher    = {Massachusetts Medical Society},
+  doi          = {10.1056/AIra2501253},
+  url          = {https://doi.org/10.1056/AIra2501253}
+}
+```
+
+A machine-readable citation is also provided in [`CITATION.cff`](CITATION.cff), which powers GitHub's
+"Cite this repository" button.
