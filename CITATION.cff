@@ -67,7 +67,8 @@ preferred-citation:
   volume: 3
   issue: 6
   pages: AIra2501253
-  publisher: Massachusetts Medical Society
+  publisher:
+    name: Massachusetts Medical Society
   doi: 10.1056/AIra2501253
   year: 2026
   month: 5
