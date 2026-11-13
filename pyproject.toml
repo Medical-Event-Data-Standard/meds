@@ -27,6 +27,9 @@ dependencies = [
     "flexible_schema ~= 0.1.0",
 ]
 
+[project.scripts]
+meds-validate = "meds.validation:main"
+
 [project.urls]
 Homepage = "https://medical-event-data-standard.github.io/"
 Issues = "https://github.com/Medical-Event-Data-Standard/meds/issues"

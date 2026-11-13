@@ -16,9 +16,16 @@ from .schema import (
     train_split,
     tuning_split,
 )
+from .validation import CheckResult, ValidationReport, validate_data_shard, validate_dataset
+from .validation import main as meds_validate
 
 # List all objects that we want to export
 _exported_objects = {
+    "CheckResult": CheckResult,
+    "ValidationReport": ValidationReport,
+    "validate_data_shard": validate_data_shard,
+    "validate_dataset": validate_dataset,
+    "meds_validate": meds_validate,
     "code_metadata_filepath": code_metadata_filepath,
     "subject_splits_filepath": subject_splits_filepath,
     "dataset_metadata_filepath": dataset_metadata_filepath,
