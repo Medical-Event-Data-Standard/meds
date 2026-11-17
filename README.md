@@ -307,6 +307,34 @@ include this metadata to provide users with a clear understanding of the data's 
 transformed into the MEDS format. Note that since this schema is about a single entity, it is the only one
 defined as a JSON schema.
 
+#### Writing dataset metadata as JSON
+
+Use an instance's `to_dict()` method before passing its fields to `json.dump` or `json.dumps`.
+The instance itself is not JSON serializable. `to_dict()` omits fields that are `None`, but preserves
+Python values, so convert a `created_at` datetime to an ISO 8601 string before serializing it.
+
+```python
+import json
+from datetime import datetime, timezone
+from pathlib import Path
+
+from meds import DatasetMetadataSchema, dataset_metadata_filepath
+
+metadata = DatasetMetadataSchema(
+    dataset_name="synthetic-example",
+    dataset_version="1.0",
+    created_at=datetime(2026, 1, 1, tzinfo=timezone.utc),
+)
+metadata_dict = metadata.to_dict()
+metadata_dict["created_at"] = metadata.created_at.isoformat()
+DatasetMetadataSchema.validate(metadata_dict)
+
+metadata_path = Path(dataset_metadata_filepath)
+metadata_path.parent.mkdir(parents=True, exist_ok=True)
+with metadata_path.open("w", encoding="utf-8") as output:
+    json.dump(metadata_dict, output, indent=2)
+```
+
 ### The `CodeMetadataSchema` schema
 
 The `CodeMetadataSchema` schema provides additional details on how to describe the types of measurements (=codes)
